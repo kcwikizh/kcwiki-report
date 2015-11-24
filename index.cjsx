@@ -5,37 +5,15 @@ request = Promise.promisifyAll require 'request'
 REPORTER_VERSION = '1.0.0'
 
 if config.get('plugin.KcwikiReporter.enable', true)
-  # Quest
-  knownQuests = []
-  questReportEnabled = false
-  # Map lv record
-  mapLv = []
-  # Create ship record
-  creating = false
-  kdockId = -1
-  detail =
-    items: []
-    highspeed: -1
-    kdockId: -1
-    largeFlag: false
-    secretary: -1
-    shipId: -1
-  # Game listener
-  request.get "http://#{SERVER_HOSTNAME}/api/report/v2/known_quests", (err, response, body) ->
-    return if err? || response.statusCode != 200
-    knownQuests = JSON.parse(body).quests
-    questReportEnabled = true
+  # Drop ship record
+  drops = []
   window.addEventListener 'game.response', async (e) ->
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
     console.log path
     switch path
       # Debug
-      when '/kcsapi/api_req_sortie/battle'
-        console.log "Path: #{path}"
-        console.log JSON.stringify body
-        console.log JSON.stringify postBody
-      when '/kcsapi/api_req_sortie/battleresult'
+      when '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_sortie/battleresult'
         console.log "Path: #{path}"
         console.log JSON.stringify body
         console.log JSON.stringify postBody
@@ -44,31 +22,33 @@ if config.get('plugin.KcwikiReporter.enable', true)
         console.log JSON.stringify body
         console.log JSON.stringify postBody
         if body.api_itemget?
-          info = 
-            mapInfoNo : body.api_mapinfo_no
-            mapAreaId : body.api_maparea_id
-            mapPointId : body.api_no
+          # Item ID: 1 油 2 弹
+          info =
+            mapId : '' + body.api_maparea_id + body.api_mapinfo_no
+            cellId : body.api_no
             itemId : body.api_itemget.api_id
-            getCount : body.api_itemget.api_getcount
-          console.log "Get <#{info.itemId}>: #{info.getCount}"
+            count : body.api_itemget.api_getcount
+          console.log "(#{info.mapId}-#{map.cellId}) Get <#{info.itemId}>: #{info.count}"
           # TODO: post data to backend
+        if body.api_happening? and body.api_happening.api_type == 1
+          # 弹 - Type:1 IconId:2
+          # 油 - Type:1 IconId:1
+          info = 
+            mapId : '' + body.api_maparea_id + body.api_mapinfo_no
+            cellId : body.api_no
+            typeId: body.api_happening.api_icon_id
+            count: body.api_happening.api_count
+            dantan: body.api_happening.dantan
+          console.log "(#{info.mapId}-#{map.cellId}) Lost <#{info.itemId}>: #{info.count}"
+          # TODO: post data to backend
+      when '/kcsapi/api_port/port'
+        drops = {}
 
   # Drop ship report
   window.addEventListener 'battle.result', async (e) ->
     {rank, boss, map, mapCell, quest, enemy, dropShipId, enemyShipId, enemyFormation, getEventItem} = e.detail
     {_teitokuLv, _nickName, _nickNameId} = window
-    info =
-      shipId: dropShipId
-      quest: quest
-      enemy: enemy
-      rank: rank
-      isBoss: boss
-      mapId: map
-      cellId: mapCell
-      teitokuLv: _teitokuLv
-      mapLv: mapLv[map] or 0
-      enemyShips: enemyShipId
-      enemyFormation: enemyFormation
+    drops.push dropShipId
     console.log JSON.stringify info
 
 module.exports =

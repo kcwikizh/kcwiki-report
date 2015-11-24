@@ -1,19 +1,19 @@
 {
   "name": "kcwiki-report",
   "version": "alpha",
-  "description": "Report plugin for kcwiki",
+  "description": "Report game data for kcwiki",
   "main": "index.cjsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/poooi/plugin-report.git"
+    "url": "git+https://github.com/kcwikizh/kcwiki-report.git"
   },
   "author": "Grzhan",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/poooi/plugin-report/issues"
+    "url": "https://github.com/kcwikizh/kcwiki-report/issues"
   },
-  "homepage": "https://github.com/poooi/plugin-report#readme"
+  "homepage": "https://github.com/kcwikizh/kcwiki-report#readme"
 }

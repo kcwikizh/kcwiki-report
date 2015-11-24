@@ -2,9 +2,9 @@
 Promise = require 'bluebird'
 async = Promise.coroutine
 request = Promise.promisifyAll require 'request'
-REPORTER_VERSION = 'alpha'
+REPORTER_VERSION = '1.0.0'
 
-if config.get('plugin.Reporter.enable', true)
+if config.get('plugin.KcwikiReporter.enable', true)
   # Quest
   knownQuests = []
   questReportEnabled = false
@@ -30,7 +30,7 @@ if config.get('plugin.Reporter.enable', true)
     {_ships, _decks, _teitokuLv} = window
     console.log path
     switch path
-      # Test
+      # Debug
       when '/kcsapi/api_req_sortie/battle'
         console.log "Path: #{path}"
         console.log JSON.stringify body
@@ -39,8 +39,7 @@ if config.get('plugin.Reporter.enable', true)
         console.log "Path: #{path}"
         console.log JSON.stringify body
         console.log JSON.stringify postBody
-      when '/kcsapi/api_req_map/start'
-      when '/kcsapi/api_req_map/next'
+      when '/kcsapi/api_req_map/start', '/kcsapi/api_req_map/next'
         console.log "Path: #{path}"
         console.log JSON.stringify body
         console.log JSON.stringify postBody
@@ -51,7 +50,8 @@ if config.get('plugin.Reporter.enable', true)
             mapPointId : body.api_no
             itemId : body.api_itemget.api_id
             getCount : body.api_itemget.api_getcount
-          console.log "获取<#{info.itemId}>: #{info.getCount}"
+          console.log "Get <#{info.itemId}>: #{info.getCount}"
+          # TODO: post data to backend
 
   # Drop ship report
   window.addEventListener 'battle.result', async (e) ->

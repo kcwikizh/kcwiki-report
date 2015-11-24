@@ -28,21 +28,21 @@ if config.get('plugin.KcwikiReporter.enable', true)
             cellId : body.api_no
             itemId : body.api_itemget.api_id
             count : body.api_itemget.api_getcount
-          console.log "(#{info.mapId}-#{map.cellId}) Get <#{info.itemId}>: #{info.count}"
+          console.log "(#{info.mapId}-#{info.cellId}) Get <#{info.itemId}>: #{info.count}"
           # TODO: post data to backend
         if body.api_happening? and body.api_happening.api_type == 1
-          # 弹 - Type:1 IconId:2
-          # 油 - Type:1 IconId:1
+          # Bullet - Type:1 IconId:2
+          # Fuel - Type:1 IconId:1
           info = 
             mapId : '' + body.api_maparea_id + body.api_mapinfo_no
             cellId : body.api_no
             typeId: body.api_happening.api_icon_id
             count: body.api_happening.api_count
             dantan: body.api_happening.dantan
-          console.log "(#{info.mapId}-#{map.cellId}) Lost <#{info.itemId}>: #{info.count}"
+          console.log "(#{info.mapId}-#{info.cellId}) Lost <#{info.itemId}>: #{info.count}"
           # TODO: post data to backend
       when '/kcsapi/api_port/port'
-        drops = {}
+        drops = []
 
   # Drop ship report
   window.addEventListener 'battle.result', async (e) ->

@@ -27,6 +27,10 @@ getTyku = (deck) ->
   alv: alvTyku
   total: totalTyku
 
+sum = (arr) ->
+  arr.reduce (total, item) -> total + item
+
 
 module.exports =
   getTyku: getTyku
+  sum: sum

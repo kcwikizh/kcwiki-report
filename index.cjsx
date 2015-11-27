@@ -109,12 +109,12 @@ if config.get('plugin.KcwikiReporter.enable', true)
           __ships = {}
           # TODO: post data to backend
         if _path.length isnt 0
-          decks = []
-          decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship)
-          decks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship) if combined
+          docks = []
+          docks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship)
+          docks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship) if combined
           info = 
             path: _path
-            decks: decks
+            docks: docks
             map: _map
           # TODO: post data to backend
       when '/kcsapi/api_req_kousyou/createship'
@@ -126,7 +126,6 @@ if config.get('plugin.KcwikiReporter.enable', true)
   window.addEventListener 'battle.result', async (e) ->
     {rank, map, mapCell, dropShipId, deckShipId } = e.detail
     {_teitokuLv, _nickName, _nickNameId, _decks} = window
-    console.log e.detail
     combined = true if deckShipId.length > 6
     tyku = getTyku(_decks[0]).total
     tyku += getTyku(_decks[1]).total if deckShipId.length > 6

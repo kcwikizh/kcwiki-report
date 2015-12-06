@@ -42,25 +42,29 @@ if config.get('plugin.KcwikiReporter.enable', true)
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
     switch path
+      # Update slotitem info
       when '/kcsapi/api_start2'
         if body.api_mst_slotitem?
-          hash = hashCode encodeURIComponent JSON.stringify body.api_mst_slotitem
-          console.log hash # -975254872
+          start = (new Date()).getTime()
+          hash = hashCode JSON.stringify body.api_mst_slotitem
+          end = (new Date()).getTime()
+          console.log "the cost of hashCode: #{end-start}ms" if process.env.DEBUG?
+          console.log "hashcode is #{hash}" if process.env.DEBUG?
           try
-            yield request.getAsync("http://#{KCWIKI_HOST}/comHash.action?hash=#{hash}").spread (response, body) ->
-              if body is "\"update\""
-                console.log body
+            yield request.getAsync("http://#{KCWIKI_HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
+              console.log "comHash.action reply: #{data}" if process.env.DEBUG?
+              if data is "\"update\""
+                console.log data
+                # console.log JSON.stringify body.api_mst_slotitem
                 request.postAsync "http://#{KCWIKI_HOST}/updateData.action",
                   form:
                     data: JSON.stringify body.api_mst_slotitem
                   headers:
                     'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
                 .spread (response, body) ->
-                  console.log body
+                  console.log "updateData.action reply: #{body}" if process.env.DEBUG?
           catch err
             console.log err
-
-
       # Battle Result
       when '/kcsapi/api_req_combined_battle/airbattle', '/kcsapi/api_req_combined_battle/battle', '/kcsapi/api_req_combined_battle/midnight_battle', '/kcsapi/api_req_combined_battle/sp_midnight', '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_battle_midnight/battle', '/kcsapi/api_req_battle_midnight/sp_midnight', '/kcsapi/api_req_sortie/airbattle', '/kcsapi/api_req_combined_battle/battle_water'
         # Report enemy ship data

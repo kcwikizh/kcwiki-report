@@ -3,8 +3,9 @@ Promise = require 'bluebird'
 async = Promise.coroutine
 request = Promise.promisifyAll require 'request'
 REPORTER_VERSION = '1.0.0'
-{getTyku, sum} = require './common'
+KCWIKI_HOST="dev.kcwiki.moe/kwks"
 
+{getTyku, sum, hashCode} = require './common'
 if config.get('plugin.KcwikiReporter.enable', true)
   drops = []
   lvs = []
@@ -37,12 +38,30 @@ if config.get('plugin.KcwikiReporter.enable', true)
         dantan: body.api_happening.dantan
       console.log "(#{info.mapId}-#{info.cellId}) Lost <#{info.typeId}>: #{info.count}" if process.env.DEBUG?
       # TODO: post data to backend
-
   window.addEventListener 'game.response', async (e) ->
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
     switch path
-      # Debug
+      when '/kcsapi/api_start2'
+        if body.api_mst_slotitem?
+          hash = hashCode encodeURIComponent JSON.stringify body.api_mst_slotitem
+          console.log hash # -975254872
+          try
+            yield request.getAsync("http://#{KCWIKI_HOST}/comHash.action?hash=#{hash}").spread (response, body) ->
+              if body is "\"update\""
+                console.log body
+                request.postAsync "http://#{KCWIKI_HOST}/updateData.action",
+                  form:
+                    data: JSON.stringify body.api_mst_slotitem
+                  headers:
+                    'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+                .spread (response, body) ->
+                  console.log body
+          catch err
+            console.log err
+
+
+      # Battle Result
       when '/kcsapi/api_req_combined_battle/airbattle', '/kcsapi/api_req_combined_battle/battle', '/kcsapi/api_req_combined_battle/midnight_battle', '/kcsapi/api_req_combined_battle/sp_midnight', '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_battle_midnight/battle', '/kcsapi/api_req_battle_midnight/sp_midnight', '/kcsapi/api_req_sortie/airbattle', '/kcsapi/api_req_combined_battle/battle_water'
         # Report enemy ship data
         info = 
@@ -57,7 +76,6 @@ if config.get('plugin.KcwikiReporter.enable', true)
         decks = (_decks[0].api_ship.concat _decks[1].api_ship)
         lvs = (_ships[deck].api_lv for deck in decks)
         console.log JSON.stringify lvs if process.env.DEBUG?
-
       when '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_port/port'
         drops = [] if 'port' in path
         if lvs.length isnt 0
@@ -80,7 +98,6 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 taisen: taisen
           console.log JSON.stringify data if process.env.DEBUG?
           lvs = []
-
       when '/kcsapi/api_req_map/start'
         combined = false
         _path = []
@@ -125,7 +142,6 @@ if config.get('plugin.KcwikiReporter.enable', true)
           ships: data
         console.log JSON.stringify info if process.env.DEBUG?
         # TODO: post data to backend
-
   # Drop ship report
   window.addEventListener 'battle.result', async (e) ->
     {rank, map, mapCell, dropShipId, deckShipId } = e.detail
@@ -141,7 +157,6 @@ if config.get('plugin.KcwikiReporter.enable', true)
       tyku: tyku
       rank: rank
     # TODO: post data to backend
-
 module.exports =
   name: 'Kcwiki-Reporter'
   author: [<a key={0} href="https://github.com/grzhan">grzhan</a>]

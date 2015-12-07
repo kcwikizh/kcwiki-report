@@ -4,6 +4,7 @@ async = Promise.coroutine
 request = Promise.promisifyAll require 'request'
 REPORTER_VERSION = '1.0.0'
 KCWIKI_HOST="dev.kcwiki.moe/kwks"
+TEST_HOST="133.130.100.133:8080/kwks"
 
 {getTyku, sum, hashCode} = require './common'
 if config.get('plugin.KcwikiReporter.enable', true)
@@ -74,7 +75,14 @@ if config.get('plugin.KcwikiReporter.enable', true)
           slots: body.api_eSlot
           param: body.api_eParam
         console.log JSON.stringify info if process.env.DEBUG?
-        # TODO: post data to backend
+        try
+          yield request.postAsync "http://#{TEST_HOST}/enemy.action",
+            form:
+              data: JSON.stringify info
+            headers:
+              'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+        catch err
+          console.log err
       when '/kcsapi/api_req_sortie/battleresult', '/kcsapi/api_req_combined_battle/battleresult'
         decks = []
         decks = (_decks[0].api_ship.concat _decks[1].api_ship)
@@ -135,7 +143,14 @@ if config.get('plugin.KcwikiReporter.enable', true)
             docks: decks
             map: _map
           console.log JSON.stringify info if process.env.DEBUG?
-          # TODO: post data to backend
+          try
+            yield request.postAsync "http://#{TEST_HOST}/path.action",
+              form:
+                data: JSON.stringify info
+              headers:
+                'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+          catch err
+            console.log err
       when '/kcsapi/api_req_kousyou/getship'
         ship = _ships[body.api_ship.api_id]
         slots = (_slotitems[slot].api_sortno for slot in ship.api_slot when slot isnt -1)
@@ -145,7 +160,17 @@ if config.get('plugin.KcwikiReporter.enable', true)
         info =
           ships: data
         console.log JSON.stringify info if process.env.DEBUG?
-        # TODO: post data to backend
+        try
+          yield request.postAsync "http://#{TEST_HOST}/initEquip.action",
+            form:
+              data: JSON.stringify info
+            headers:
+              'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+          .spread (response, body) ->
+            console.log "updateData.action reply: #{body}" if process.env.DEBUG?
+        catch err
+          console.log err
+
   # Drop ship report
   window.addEventListener 'battle.result', async (e) ->
     {rank, map, mapCell, dropShipId, deckShipId } = e.detail
@@ -160,7 +185,15 @@ if config.get('plugin.KcwikiReporter.enable', true)
       cellId: mapCell
       tyku: tyku
       rank: rank
-    # TODO: post data to backend
+    try
+      yield request.postAsync "http://#{TEST_HOST}/tyku.action",
+        form:
+          data: JSON.stringify info
+        headers:
+          'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+    catch err
+      console.log err
+
 module.exports =
   name: 'Kcwiki-Reporter'
   author: [<a key={0} href="https://github.com/grzhan">grzhan</a>]

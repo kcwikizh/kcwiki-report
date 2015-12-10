@@ -25,8 +25,14 @@ if config.get('plugin.KcwikiReporter.enable', true)
         cellId : body.api_no
         itemId : body.api_itemget.api_id
         count : body.api_itemget.api_getcount
-      console.log "(#{info.mapId}-#{info.cellId}) Get <#{info.itemId}>: #{info.count}" if process.env.DEBUG
-      # TODO: post data to backend
+      console.log JSON.stringify info if process.env.DEBUG
+      request.postAsync "http://#{KCWIKI_HOST}/getitem.action",
+        form:
+          data: JSON.stringify info
+        headers:
+          'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+      .spread (response, body) ->
+        console.log "getitem.action response: #{body}" if process.env.DEBUG?    
     # Report dropitem data
     if body.api_happening? and body.api_happening.api_type is 1
       # Bullet - Type:1 IconId:2
@@ -37,8 +43,14 @@ if config.get('plugin.KcwikiReporter.enable', true)
         typeId: body.api_happening.api_icon_id
         count: body.api_happening.api_count
         dantan: body.api_happening.dantan
-      console.log "(#{info.mapId}-#{info.cellId}) Lost <#{info.typeId}>: #{info.count}" if process.env.DEBUG?
-      # TODO: post data to backend
+      console.log JSON.stringify info if process.env.DEBUG
+      request.postAsync "http://#{KCWIKI_HOST}/dropitem.action",
+        form:
+          data: JSON.stringify info
+        headers:
+          'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+      .spread (response, body) ->
+        console.log "dropitem.action response: #{body}" if process.env.DEBUG?
   window.addEventListener 'game.response', async (e) ->
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
@@ -53,7 +65,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
           console.log "hashcode is #{hash}" if process.env.DEBUG?
           try
             yield request.getAsync("http://#{KCWIKI_HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
-              console.log "comHash.action reply: #{data}" if process.env.DEBUG?
+              console.log "comHash.action response: #{data}" if process.env.DEBUG?
               if data is "\"update\""
                 console.log data
                 # console.log JSON.stringify body.api_mst_slotitem
@@ -63,7 +75,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
                   headers:
                     'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
                 .spread (response, body) ->
-                  console.log "updateData.action reply: #{body}" if process.env.DEBUG?
+                  console.log "updateData.action response: #{body}" if process.env.DEBUG?
           catch err
             console.log err
       # Battle Result
@@ -82,7 +94,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
             headers:
               'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
           .spread (response, body) ->
-            console.log "enemy.action reply: #{body}" if process.env.DEBUG?
+            console.log "enemy.action response: #{body}" if process.env.DEBUG?
         catch err
           console.log err
       when '/kcsapi/api_req_sortie/battleresult', '/kcsapi/api_req_combined_battle/battleresult'
@@ -110,6 +122,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 luck: luck
                 sakuteki: sakuteki
                 taisen: taisen
+                kaihi: kaihi
           console.log JSON.stringify data if process.env.DEBUG?
           lvs = []
       when '/kcsapi/api_req_map/start'
@@ -142,7 +155,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 headers:
                   'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
               .spread (response, body) ->
-                console.log "initEquip.action reply: #{body}" if process.env.DEBUG?
+                console.log "initEquip.action response: #{body}" if process.env.DEBUG?
             catch err
               console.log err
         if _path.length isnt 0
@@ -162,7 +175,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
               headers:
                 'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
             .spread (response, body) ->
-              console.log "path.action reply: #{body}" if process.env.DEBUG?
+              console.log "path.action response: #{body}" if process.env.DEBUG?
           catch err
             console.log err
       when '/kcsapi/api_req_kousyou/getship'
@@ -182,7 +195,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
             headers:
               'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
           .spread (response, body) ->
-            console.log "initEquip.action reply: #{body}" if process.env.DEBUG?
+            console.log "initEquip.action response: #{body}" if process.env.DEBUG?
         catch err
           console.log err
 
@@ -207,7 +220,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
         headers:
           'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
       .spread (response, body) ->
-        console.log "tyku.action reply: #{body}" if process.env.DEBUG?
+        console.log "tyku.action response: #{body}" if process.env.DEBUG?
     catch err
       console.log err
 

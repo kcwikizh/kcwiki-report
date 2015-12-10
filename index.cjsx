@@ -81,19 +81,21 @@ if config.get('plugin.KcwikiReporter.enable', true)
               data: JSON.stringify info
             headers:
               'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+          .spread (response, body) ->
+            console.log "enemy.action reply: #{body}" if process.env.DEBUG?
         catch err
           console.log err
       when '/kcsapi/api_req_sortie/battleresult', '/kcsapi/api_req_combined_battle/battleresult'
         decks = []
         decks = (_decks[0].api_ship.concat _decks[1].api_ship)
-        lvs = (_ships[deck].api_lv for deck in decks)
+        lvs = (_ships[deck].api_lv for deck in decks when deck isnt -1)
         console.log JSON.stringify lvs if process.env.DEBUG?
       when '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_port/port'
         drops = [] if 'port' in path
         if lvs.length isnt 0
           decks = []
           decks = (_decks[0].api_ship.concat _decks[1].api_ship)
-          lvsNew = (_ships[deck].api_lv for deck in decks)
+          lvsNew = (_ships[deck].api_lv for deck in decks when deck isnt -1)
           data = []
           for lv,i in lvs 
               continue if lv is lvsNew[i]
@@ -123,7 +125,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
           _keys = _.keys _ships
           __keys = _.keys __ships
           _newKeys = _.difference _keys,__keys
-          if _newShips.length > 0
+          if _newKeys.length > 0
             _newShips[_ships[key].api_sortno] = _ships[key].api_slot for key in _newKeys
             for shipno,slots of _newShips
               _newShips[shipno] = (_slotitems[slot].api_sortno for slot in slots when slot isnt -1)
@@ -132,15 +134,25 @@ if config.get('plugin.KcwikiReporter.enable', true)
               ships: _newShips
             __ships = {}
             console.log JSON.stringify info if process.env.DEBUG?
-            # TODO: post data to backend
+            try
+              yield request.postAsync "http://#{TEST_HOST}/initEquip.action",
+                form:
+                  # data: JSON.stringify info
+                  ships: JSON.stringify _newShips
+                headers:
+                  'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+              .spread (response, body) ->
+                console.log "initEquip.action reply: #{body}" if process.env.DEBUG?
+            catch err
+              console.log err
         if _path.length isnt 0
           decks = []
-          decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship)
-          decks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship) if combined
+          decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship when shipId isnt -1)
+          decks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship when shipId isnt -1) if combined
           # Report path data
           info = 
             path: _path
-            docks: decks
+            decks: decks
             map: _map
           console.log JSON.stringify info if process.env.DEBUG?
           try
@@ -149,6 +161,8 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 data: JSON.stringify info
               headers:
                 'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+            .spread (response, body) ->
+              console.log "path.action reply: #{body}" if process.env.DEBUG?
           catch err
             console.log err
       when '/kcsapi/api_req_kousyou/getship'
@@ -163,11 +177,12 @@ if config.get('plugin.KcwikiReporter.enable', true)
         try
           yield request.postAsync "http://#{TEST_HOST}/initEquip.action",
             form:
-              data: JSON.stringify info
+              # data: JSON.stringify info
+              ships: JSON.stringify data
             headers:
               'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
           .spread (response, body) ->
-            console.log "updateData.action reply: #{body}" if process.env.DEBUG?
+            console.log "initEquip.action reply: #{body}" if process.env.DEBUG?
         catch err
           console.log err
 
@@ -191,6 +206,8 @@ if config.get('plugin.KcwikiReporter.enable', true)
           data: JSON.stringify info
         headers:
           'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+      .spread (response, body) ->
+        console.log "tyku.action reply: #{body}" if process.env.DEBUG?
     catch err
       console.log err
 

@@ -123,7 +123,19 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 sakuteki: sakuteki
                 taisen: taisen
                 kaihi: kaihi
-          console.log JSON.stringify data if process.env.DEBUG?
+          if data.length > 0
+            try
+              yield request.postAsync "http://#{TEST_HOST}/attr.action",
+                form:
+                  # data: JSON.stringify info
+                  data: JSON.stringify data
+                headers:
+                  'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
+              .spread (response, body) ->
+                console.log "attr.action response: #{body}" if process.env.DEBUG?
+            catch err
+              console.log err              
+            console.log JSON.stringify data if process.env.DEBUG?
           lvs = []
       when '/kcsapi/api_req_map/start'
         combined = false

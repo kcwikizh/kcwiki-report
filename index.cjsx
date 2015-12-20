@@ -88,7 +88,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
           param: body.api_eParam
         console.log JSON.stringify info if process.env.DEBUG?
         try
-          yield request.postAsync "http://#{TEST_HOST}/enemy.action",
+          yield request.postAsync "http://#{KCWIKI_HOST}/enemy.action",
             form:
               data: JSON.stringify info
             headers:
@@ -125,7 +125,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
                 kaihi: kaihi
           if data.length > 0
             try
-              yield request.postAsync "http://#{TEST_HOST}/attr.action",
+              yield request.postAsync "http://#{KCWIKI_HOST}/attr.action",
                 form:
                   # data: JSON.stringify info
                   data: JSON.stringify data
@@ -160,7 +160,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
             __ships = {}
             console.log JSON.stringify info if process.env.DEBUG?
             try
-              yield request.postAsync "http://#{TEST_HOST}/initEquip.action",
+              yield request.postAsync "http://#{KCWIKI_HOST}/initEquip.action",
                 form:
                   # data: JSON.stringify info
                   ships: JSON.stringify _newShips
@@ -181,7 +181,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
             map: _map
           console.log JSON.stringify info if process.env.DEBUG?
           try
-            yield request.postAsync "http://#{TEST_HOST}/path.action",
+            yield request.postAsync "http://#{KCWIKI_HOST}/path.action",
               form:
                 data: JSON.stringify info
               headers:
@@ -200,7 +200,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
           ships: data
         console.log JSON.stringify info if process.env.DEBUG?
         try
-          yield request.postAsync "http://#{TEST_HOST}/initEquip.action",
+          yield request.postAsync "http://#{KCWIKI_HOST}/initEquip.action",
             form:
               # data: JSON.stringify info
               ships: JSON.stringify data
@@ -226,7 +226,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
       tyku: tyku
       rank: rank
     try
-      yield request.postAsync "http://#{TEST_HOST}/tyku.action",
+      yield request.postAsync "http://#{KCWIKI_HOST}/tyku.action",
         form:
           data: JSON.stringify info
         headers:

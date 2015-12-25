@@ -27,6 +27,23 @@ getTyku = (deck) ->
   alv: alvTyku
   total: totalTyku
 
+
+class HashTable
+  constructor: (@data) ->
+
+  miss: (key) ->
+    not @data[@hash(key)]?
+  put: (obj) ->
+    @data[@hash(obj)] = true
+  hash: (obj) ->
+    hashCode(obj)
+  clear: () ->
+    @data = {}
+  raw: () ->
+    @data
+
+
+
 sum = (arr) ->
   arr.reduce (total, item) -> total + item
 
@@ -36,7 +53,10 @@ hashCode = (val) ->
   val.split('').reduce (h, ch) -> h = h.charCodeAt(0) if typeof(h) is 'string'; h = ((h << 5) - h) + ch.charCodeAt(0); h |= 0;
 
 
+
+
 module.exports =
   getTyku: getTyku
   sum: sum
   hashCode: hashCode
+  HashTable: HashTable

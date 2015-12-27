@@ -36,7 +36,7 @@ class HashTable
   put: (obj) ->
     @data[@hash(obj)] = true
   hash: (obj) ->
-    hashCode(obj)
+    hashCode JSON.stringify obj
   clear: () ->
     @data = {}
   raw: () ->
@@ -50,9 +50,10 @@ sum = (arr) ->
 # JS Implementation of Java's String Hashcode Method
 # http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
 hashCode = (val) ->
-  val.split('').reduce (h, ch) -> h = h.charCodeAt(0) if typeof(h) is 'string'; h = ((h << 5) - h) + ch.charCodeAt(0); h |= 0;
-
-
+  val.split('').reduce (h, ch) -> 
+    h = h.charCodeAt(0) if typeof(h) is 'string';
+    h = ((h << 5) - h) + ch.charCodeAt(0);
+    h |= 0;
 
 
 module.exports =

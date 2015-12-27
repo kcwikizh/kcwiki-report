@@ -1,10 +1,12 @@
 {_, SERVER_HOSTNAME} = window
-{reportInit, reportSlotItem, reportEnemy, reportShipAttr, handleMapStart, reportGetLoseItem, reportInitEquipByDrop, reportInitEquipByBuild, reportPath, handleBattleResult, reoprtTyku} = require './report'
+Promise = require 'bluebird'
+async = Promise.coroutine
+{reportInit, reportSlotItem, reportEnemy, reportShipAttr, handleMapStart, reportGetLoseItem, reportInitEquipByDrop, reportInitEquipByBuild, reportPath, handleBattleResult, reoprtTyku, cacheSync} = require './report'
 REPORTER_VERSION = '1.0.0'
 
 if config.get('plugin.KcwikiReporter.enable', true)
   reportInit()
-  window.addEventListener 'game.response', async (e) ->
+  window.addEventListener 'game.response', (e) ->
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
     switch path
@@ -14,6 +16,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
         reportEnemy(body)
       when '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_port/port'
         reportShipAttr(path)
+        cacheSync()
       when '/kcsapi/api_req_map/start'
         handleMapStart(_ships)
         reportGetLoseItem(body)
@@ -28,7 +31,7 @@ if config.get('plugin.KcwikiReporter.enable', true)
     {rank, map, mapCell, dropShipId, deckShipId } = e.detail
     {_teitokuLv, _nickName, _nickNameId, _decks, _ships} = window
     handleBattleResult(_decks, _ships)
-    reoprtTyku(detail)
+    reoprtTyku(e.detail)
 
 module.exports =
   name: 'Kcwiki-Reporter'

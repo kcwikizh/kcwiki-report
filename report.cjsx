@@ -1,12 +1,13 @@
-{_, SERVER_HOSTNAME} = window
+{_, SERVER_HOSTNAME, APPDATA_PATH} = window
 Promise = require 'bluebird'
-fs = require 'fs'
+fs = Promise.promisifyAll require 'fs-extra'
 async = Promise.coroutine
 request = Promise.promisifyAll require 'request'
-{getTyku, sum, hashCode} = require './common'
+{getTyku, sum, hashCode, HashTable} = require './common'
+path = require 'path'
 KCWIKI_HOST="dev.kcwiki.moe/kwks"
 TEST_HOST="133.130.100.133:8080/kwks"
-CACHE_FILE='cache.json'
+CACHE_FILE= path.join APPDATA_PATH, 'kcwiki-report', 'cache.json'
 HOST = KCWIKI_HOST
 
 drops = []
@@ -15,90 +16,83 @@ _path = []
 __ships = {}
 _map = ''
 combined = false
-cache = null
+cache = new HashTable {}
 
-fs.stat CACHE_FILE, (err) ->
-	if not err?
-		fs.readFile CACHE_FILE, (err, data) ->
-			if err?
-				cache = new HashTable {}
-			else
-				cache = new HashTable JSON.parse data
+fs.readFileAsync CACHE_FILE, (err, data) ->
+  cache = new HashTable JSON.parse data unless err?
+  console.log 'File not exist' if err?.code is 'ENOENT'
+  console.error err unless err?.code is 'ENOENT'
 
 reportInit = ->
-	drops = []
-	lvs = []
-	_path = []
-	__ships = {}
-	_map = ''
-	combined = false
+  drops = []
+  lvs = []
+  _path = []
+  __ships = {}
+  _map = ''
+  combined = false
 
 reportGetLoseItem = (body) ->
-	_map = '' + body.api_maparea_id + body.api_mapinfo_no
-	_path.push body.api_no
-	# Report getitem data
-	if body.api_itemget?
-		# Item ID: 1 油 2 弹
-		info =
-			mapId : _map
-			cellId : body.api_no
-			itemId : body.api_itemget.api_id
-			count : body.api_itemget.api_getcount
-		console.log JSON.stringify info if process.env.DEBUG
-		if cache.miss info	
-			request.postAsync "http://#{HOST}/getitem.action",
-				form:
-					data: JSON.stringify info
-				headers:
-					'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-			.spread (response, body) ->
-				console.log "getitem.action response: #{body}" if process.env.DEBUG?    
-				cache.put info
-	# Report dropitem data
-	if body.api_happening? and body.api_happening.api_type is 1
-		# Bullet - Type:1 IconId:2
-		# Fuel - Type:1 IconId:1
-		info = 
-			mapId : _map
-			cellId : body.api_no
-			typeId: body.api_happening.api_icon_id
-			count: body.api_happening.api_count
-			dantan: body.api_happening.dantan
-		console.log JSON.stringify info if process.env.DEBUG
-		if cache.miss info
-			request.postAsync "http://#{HOST}/dropitem.action",
-				form:
-					data: JSON.stringify info
-				headers:
-					'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-			.spread (response, body) ->
-				console.log "dropitem.action response: #{body}" if process.env.DEBUG?
-				cache.put info
+  _map = '' + body.api_maparea_id + body.api_mapinfo_no
+  _path.push body.api_no
+  # Report getitem data
+  if body.api_itemget?
+    # Item ID: 1 油 2 弹
+    info =
+      mapId : _map
+      cellId : body.api_no
+      itemId : body.api_itemget.api_id
+      count : body.api_itemget.api_getcount
+    console.log JSON.stringify info if process.env.DEBUG
+    if cache.miss info  
+      return request.postAsync "http://#{HOST}/getitem.action",
+        form:
+          data: JSON.stringify info
+      .spread (response, body) ->
+        console.log "getitem.action response: #{body}" if process.env.DEBUG?    
+        cache.put info
+        return
+  # Report dropitem data
+  if body.api_happening? and body.api_happening.api_type is 1
+    # Bullet - Type:1 IconId:2
+    # Fuel - Type:1 IconId:1
+    info = 
+      mapId : _map
+      cellId : body.api_no
+      typeId: body.api_happening.api_icon_id
+      count: body.api_happening.api_count
+      dantan: body.api_happening.dantan
+    console.log JSON.stringify info if process.env.DEBUG
+    if cache.miss info
+      return request.postAsync "http://#{HOST}/dropitem.action",
+        form:
+          data: JSON.stringify info
+      .spread (response, body) ->
+        console.log "dropitem.action response: #{body}" if process.env.DEBUG?
+        cache.put info
+        return
 
 reportSlotItem = (body) ->
-	if body.api_mst_slotitem?
-		start = (new Date()).getTime()
-		hash = hashCode JSON.stringify body.api_mst_slotitem
-		end = (new Date()).getTime()
-		console.log "the cost of hashCode: #{end-start}ms" if process.env.DEBUG?
-		console.log "hashcode is #{hash}" if process.env.DEBUG?
-		if cache.miss body.api_mst_slotitem
-			try
-				request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
-					console.log "comHash.action response: #{data}" if process.env.DEBUG?
-					if data is "\"update\""
-						console.log data
-						# console.log JSON.stringify body.api_mst_slotitem
-						request.postAsync "http://#{HOST}/updateData.action",
-							form:
-								data: JSON.stringify body.api_mst_slotitem
-							headers:
-								'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-						.spread (response, body) ->
-							console.log "updateData.action response: #{body}" if process.env.DEBUG?
-							cache.put body.api_mst_slotitem
-			catch err
-				console.log err
+  if body.api_mst_slotitem?
+    start = (new Date()).getTime()
+    hash = hashCode JSON.stringify body.api_mst_slotitem
+    end = (new Date()).getTime()
+    console.log "the cost of hashCode: #{end-start}ms" if process.env.DEBUG?
+    console.log "hashcode is #{hash}" if process.env.DEBUG?
+    console.log "cache is #{JSON.stringify cache}" if process.env.DEBUG?
+    try
+      return request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
+        console.log "comHash.action response: #{data}" if process.env.DEBUG?
+        if data is "\"update\""
+          console.log data
+          # console.log JSON.stringify body.api_mst_slotitem
+          request.postAsync "http://#{HOST}/updateData.action",
+            form:
+              data: JSON.stringify body.api_mst_slotitem
+          .spread (response, body) ->
+            console.log "updateData.action response: #{body}" if process.env.DEBUG?
+            return
+    catch err
+      console.log err
 
 # Report enemy ship data
 reportEnemy = (body) ->
@@ -109,21 +103,20 @@ reportEnemy = (body) ->
     param: body.api_eParam
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss info
-	  try
-	    request.postAsync "http://#{HOST}/enemy.action",
-	      form:
-	        data: JSON.stringify info
-	      headers:
-	        'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-	    .spread (response, body) ->
-	      console.log "enemy.action response: #{body}" if process.env.DEBUG?
-	      cache.put info
-	  catch err
-	    console.log err
+    try
+      return request.postAsync "http://#{HOST}/enemy.action",
+        form:
+          data: JSON.stringify info
+      .spread (response, body) ->
+        console.log "enemy.action response: #{body}" if process.env.DEBUG?
+        cache.put info
+        return
+    catch err
+      console.log err
 
 # data: JSON.stringify info
 reportShipAttr = (path) ->
-	{_ships, _decks, _teitokuLv, _slotitems} = window
+  {_ships, _decks, _teitokuLv, _slotitems} = window
   drops = [] if 'port' in path
   if lvs.length isnt 0
     decks = (_decks[0].api_ship.concat _decks[1].api_ship)
@@ -145,14 +138,13 @@ reportShipAttr = (path) ->
           kaihi: kaihi
     if data.length > 0 and cache.miss data
       try
-        request.postAsync "http://#{HOST}/attr.action",
+        return request.postAsync "http://#{HOST}/attr.action",
           form:
             data: JSON.stringify data
-          headers:
-            'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
         .spread (response, body) ->
           console.log "attr.action response: #{body}" if process.env.DEBUG?
           cache.put data
+          return
       catch err
         console.log err              
       console.log JSON.stringify data if process.env.DEBUG?
@@ -174,18 +166,17 @@ reportInitEquipByDrop = (_ships)->
       __ships = {}
       console.log JSON.stringify info if process.env.DEBUG?
       if cache.miss _newShips
-	      try
-	        request.postAsync "http://#{HOST}/initEquip.action",
-	          form:
-	            # data: JSON.stringify info
-	            ships: JSON.stringify _newShips
-	          headers:
-	            'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-	        .spread (response, body) ->
-	          console.log "initEquip.action response: #{body}" if process.env.DEBUG?
-	          cache.put _newShips
-	      catch err
-	        console.log err
+        try
+          return request.postAsync "http://#{HOST}/initEquip.action",
+            form:
+              # data: JSON.stringify info
+              ships: JSON.stringify _newShips
+          .spread (response, body) ->
+            console.log "initEquip.action response: #{body}" if process.env.DEBUG?
+            cache.put _newShips
+            return
+        catch err
+          console.log err
 
 # Report initial equip data
 reportInitEquipByBuild = (body, _ships) ->
@@ -197,47 +188,45 @@ reportInitEquipByBuild = (body, _ships) ->
     ships: data
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss data
-	  try
-	    yield request.postAsync "http://#{HOST}/initEquip.action",
-	      form:
-	        # data: JSON.stringify info
-	        ships: JSON.stringify data
-	      headers:
-	        'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-	    .spread (response, body) ->
-	      console.log "initEquip.action response: #{body}" if process.env.DEBUG?
-	      cache.put data
-	  catch err
-	    console.log err
+    try
+      return request.postAsync "http://#{HOST}/initEquip.action",
+        form:
+          # data: JSON.stringify info
+          ships: JSON.stringify data
+      .spread (response, body) ->
+        console.log "initEquip.action response: #{body}" if process.env.DEBUG?
+        cache.put data
+        return
+    catch err
+      console.log err
 
 # Report path data
 reportPath = (_decks)->
-	if _path.length isnt 0
-	  decks = []
-	  decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship when shipId isnt -1)
-	  decks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship when shipId isnt -1) if combined
-	  info = 
-	    path: _path
-	    decks: decks
-	    map: _map
-	  console.log JSON.stringify info if process.env.DEBUG?
-	  if cache.miss info
-		  try
-		    yield request.postAsync "http://#{HOST}/path.action",
-		      form:
-		        data: JSON.stringify info
-		      headers:
-		        'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-		    .spread (response, body) ->
-		      console.log "path.action response: #{body}" if process.env.DEBUG?
-		      cache.put info
-		  catch err
-		    console.log err
+  if _path.length isnt 0
+    decks = []
+    decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship when shipId isnt -1)
+    decks[1] = (_ships[shipId].api_sortno for shipId in _decks[1].api_ship when shipId isnt -1) if combined
+    info = 
+      path: _path
+      decks: decks
+      map: _map
+    console.log JSON.stringify info if process.env.DEBUG?
+    if cache.miss info
+      try
+        return request.postAsync "http://#{HOST}/path.action",
+          form:
+            data: JSON.stringify info
+        .spread (response, body) ->
+          console.log "path.action response: #{body}" if process.env.DEBUG?
+          cache.put info
+          return
+      catch err
+        console.log err
 
 # Report tyku data
 reoprtTyku = (detail) ->
-	{rank, map, mapCell, dropShipId, deckShipId } = detail
-	{_teitokuLv, _nickName, _nickNameId, _decks} = window
+  {rank, map, mapCell, dropShipId, deckShipId } = detail
+  {_teitokuLv, _nickName, _nickNameId, _decks} = window
   combined = true if deckShipId.length > 6
   tyku = getTyku(_decks[0]).total
   tyku += getTyku(_decks[1]).total if deckShipId.length > 6
@@ -248,17 +237,24 @@ reoprtTyku = (detail) ->
     tyku: tyku
     rank: rank
   if cache.miss info
-	  try
-	    yield request.postAsync "http://#{HOST}/tyku.action",
-	      form:
-	        data: JSON.stringify info
-	      headers:
-	        'User-Agent': "Kcwiki Reporter v#{REPORTER_VERSION}"
-	    .spread (response, body) ->
-	      console.log "tyku.action response: #{body}" if process.env.DEBUG?
-	      cache.put info
-	  catch err
-	    console.log err
+    try
+      return request.postAsync "http://#{HOST}/tyku.action",
+        form:
+          data: JSON.stringify info
+      .spread (response, body) ->
+        console.log "tyku.action response: #{body}" if process.env.DEBUG?
+        cache.put info
+        return
+    catch err
+      console.log err
+
+cacheSync = ->
+  fs.ensureDirSync path.join APPDATA_PATH, 'kcwiki-report'
+  fs.writeFileAsync CACHE_FILE, JSON.stringify(cache), (err) ->
+    console.error err if err?
+    console.log "Cache Sync Done." if process.env.DEBUG?
+    return
+
 
 handleMapStart = (_ships)->
   combined = false
@@ -272,13 +268,15 @@ handleBattleResult = (_decks, _ships) ->
   console.log JSON.stringify lvs if process.env.DEBUG?
 
 module.exports = 
-	reportInit: reportInit,
-	reportEnemy: reportEnemy,
-	reportSlotItem: reportSlotItem,
-	reportPath: reportPath,
-	reportShipAttr: reportShipAttr,
-	reoprtTyku: reoprtTyku,
-	reportInitEquipByBuild: reportInitEquipByBuild,
-	reportInitEquipByDrop: reportInitEquipByDrop,
-	handleBattleResult: handleBattleResult,
-	handleMapStart: handleMapStart
+  reportInit: reportInit,
+  reportGetLoseItem: reportGetLoseItem,
+  reportEnemy: reportEnemy,
+  reportSlotItem: reportSlotItem,
+  reportPath: reportPath,
+  reportShipAttr: reportShipAttr,
+  reoprtTyku: reoprtTyku,
+  reportInitEquipByBuild: reportInitEquipByBuild,
+  reportInitEquipByDrop: reportInitEquipByDrop,
+  handleBattleResult: handleBattleResult,
+  handleMapStart: handleMapStart
+  cacheSync: cacheSync

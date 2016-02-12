@@ -31,6 +31,7 @@ reportInit = ->
   _map = ''
   combined = false
 
+# Report map event (etc. get resource)
 reportGetLoseItem = async (body) ->
   _map = '' + body.api_maparea_id + body.api_mapinfo_no
   _path.push body.api_no
@@ -44,13 +45,11 @@ reportGetLoseItem = async (body) ->
       count : body.api_itemget.api_getcount
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info  
-      yield request.postAsync "http://#{HOST}/getitem.action",
+      [response, repData] = yield request.postAsync "http://#{HOST}/getitem.action",
         form:
           data: JSON.stringify info
-      .spread (response, body) ->
-        console.log "getitem.action response: #{body}" if process.env.DEBUG?    
-        cache.put info
-        return
+      console.log "getitem.action response: #{repData}" if process.env.DEBUG?    
+      cache.put info
   # Report dropitem data
   if body.api_happening? and body.api_happening.api_type is 1
     # Bullet - Type:1 IconId:2
@@ -63,16 +62,15 @@ reportGetLoseItem = async (body) ->
       dantan: body.api_happening.dantan
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info
-      yield request.postAsync "http://#{HOST}/dropitem.action",
+      [response, repData] = yield request.postAsync "http://#{HOST}/dropitem.action",
         form:
           data: JSON.stringify info
-      .spread (response, body) ->
-        console.log "dropitem.action response: #{body}" if process.env.DEBUG?
-        cache.put info
-        return
+      console.log "dropitem.action response: #{repData}" if process.env.DEBUG?
+      cache.put info
   return
 
-reportSlotItem = (body) ->
+# Report api_start2.api_mst_slotitem
+reportSlotItem = async (body) ->
   if body.api_mst_slotitem?
     start = (new Date()).getTime()
     hash = hashCode JSON.stringify body.api_mst_slotitem
@@ -81,21 +79,18 @@ reportSlotItem = (body) ->
     console.log "hashcode is #{hash}" if process.env.DEBUG?
     console.log "cache is #{JSON.stringify cache}" if process.env.DEBUG?
     try
-      return yield request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
-        console.log "comHash.action response: #{data}" if process.env.DEBUG?
-        if data is "\"update\""
-          console.log data
-          # console.log JSON.stringify body.api_mst_slotitem
-          return yield request.postAsync "http://#{HOST}/updateData.action",
-            form:
-              data: JSON.stringify body.api_mst_slotitem
-          .spread (response, body) ->
-            console.log "updateData.action response: #{body}" if process.env.DEBUG?
-            return
+      [response, repData] =  yield request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}")
+      console.log "comHash.action response: #{repData}" if process.env.DEBUG?
+      if repData is "\"update\""
+        [response, repData] = yield request.postAsync "http://#{HOST}/updateData.action",
+          form:
+            data: JSON.stringify body.api_mst_slotitem
+        console.log "updateData.action response: #{repData}" if process.env.DEBUG?
     catch err
       console.log err
+  return
 
-# Report enemy ship data
+# Report enemy fleet data
 reportEnemy = async (body) ->
   info = 
     id: body.api_ship_ke[1..]
@@ -105,17 +100,15 @@ reportEnemy = async (body) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss info
     try
-      yield request.postAsync "http://#{HOST}/enemy.action",
+      [response, repData] = yield request.postAsync "http://#{HOST}/enemy.action",
         form:
           data: JSON.stringify info
-      .spread (response, body) ->
-        console.log "enemy.action response: #{body}" if process.env.DEBUG?
-        cache.put info
-        return
+      console.log "enemy.action response: #{repData}" if process.env.DEBUG?
+      cache.put info
     catch err
       console.log err
 
-# data: JSON.stringify info
+# Report ship attributes
 reportShipAttr = async (path) ->
   {_ships, _decks, _teitokuLv, _slotitems} = window
   drops = [] if 'port' in path
@@ -137,16 +130,14 @@ reportShipAttr = async (path) ->
           sakuteki: sakuteki
           taisen: taisen
           kaihi: kaihi
-          lv: lv
+          lv: lvsNew[i]
     if data.length > 0 and cache.miss data
       try
-        yield request.postAsync "http://#{HOST}/attr.action",
+        [response, repData] = yield request.postAsync "http://#{HOST}/attr.action",
           form:
             data: JSON.stringify data
-        .spread (response, body) ->
-          console.log "attr.action response: #{body}" if process.env.DEBUG?
-          cache.put data
-          return
+        console.log "attr.action response: #{repData}" if process.env.DEBUG?
+        cache.put data
       catch err
         console.log err              
       console.log JSON.stringify data if process.env.DEBUG?
@@ -169,20 +160,18 @@ reportInitEquipByDrop = async (_ships) ->
       console.log JSON.stringify info if process.env.DEBUG?
       if cache.miss _newShips
         try
-          yield request.postAsync "http://#{HOST}/initEquip.action",
+          [response, repData] = yield request.postAsync "http://#{HOST}/initEquip.action",
             form:
               # data: JSON.stringify info
               ships: JSON.stringify _newShips
-          .spread (response, body) ->
-            console.log "initEquip.action response: #{body}" if process.env.DEBUG?
-            cache.put _newShips
-            return
+          console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
+          cache.put _newShips
         catch err
           console.log err
   return
 
 # Report initial equip data
-reportInitEquipByBuild = async (body, _ships) ->
+reportInitEquipByBuild = async ((body, _ships) ->
   ship = _ships[body.api_ship.api_id]
   slots = (_slotitems[slot].api_sortno for slot in ship.api_slot when slot isnt -1)
   data = {}
@@ -192,17 +181,15 @@ reportInitEquipByBuild = async (body, _ships) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss data
     try
-      yield request.postAsync "http://#{HOST}/initEquip.action",
+      [response, repData] = yield request.postAsync "http://#{HOST}/initEquip.action",
         form:
           # data: JSON.stringify info
           ships: JSON.stringify data
-      .spread (response, body) ->
-        console.log "initEquip.action response: #{body}" if process.env.DEBUG?
-        cache.put data
-        return
+      console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
+      cache.put data
     catch err
       console.log err
-return
+  return )
 
 # Report path data
 reportPath = async (_decks)->
@@ -217,13 +204,11 @@ reportPath = async (_decks)->
     console.log JSON.stringify info if process.env.DEBUG?
     if cache.miss info
       try
-        yield request.postAsync "http://#{HOST}/path.action",
+        [response, repData] = yield request.postAsync "http://#{HOST}/path.action",
           form:
             data: JSON.stringify info
-        .spread (response, body) ->
-          console.log "path.action response: #{body}" if process.env.DEBUG?
-          cache.put info
-          return
+        console.log "path.action response: #{repData}" if process.env.DEBUG?
+        cache.put info
       catch err
         console.log err
   return
@@ -243,25 +228,24 @@ reoprtTyku = async (detail) ->
     rank: rank
   if cache.miss info
     try
-      yield request.postAsync "http://#{HOST}/tyku.action",
+      [response, repData] = yield request.postAsync "http://#{HOST}/tyku.action",
         form:
           data: JSON.stringify info
-      .spread (response, body) ->
-        console.log "tyku.action response: #{body}" if process.env.DEBUG?
-        cache.put info
-        return
+      console.log "tyku.action response: #{repData}" if process.env.DEBUG?
+      cache.put info
     catch err
       console.log err
   return
 
 cacheSync = ->
   fs.ensureDirSync path.join APPDATA_PATH, 'kcwiki-report'
-  console.log JSON.stringify cache.raw() if process.env.DEBUG?
-  fs.writeFileAsync CACHE_FILE, JSON.stringify(cache.raw()) , (err) ->
+  data = JSON.stringify cache.raw()
+  console.log data if process.env.DEBUG?
+  cache.clear() if data.length > 1000000
+  fs.writeFileAsync CACHE_FILE, data, (err) ->
     console.error JSON.stringify err if err
     console.log "Cache Sync Done." if process.env.DEBUG?
     return
-
 
 handleMapStart = (_ships)->
   combined = false

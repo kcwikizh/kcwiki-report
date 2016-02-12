@@ -10,8 +10,8 @@ if config.get('plugin.KcwikiReporter.enable', true)
     {method, path, body, postBody} = e.detail
     {_ships, _decks, _teitokuLv} = window
     switch path
-      # when '/kcsapi/api_start2'
-        # return reportSlotItem(body, _decks, _ships)
+      when '/kcsapi/api_start2'
+        reportSlotItem(body, _decks, _ships)
       when '/kcsapi/api_req_combined_battle/airbattle', '/kcsapi/api_req_combined_battle/battle', '/kcsapi/api_req_combined_battle/midnight_battle', '/kcsapi/api_req_combined_battle/sp_midnight', '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_battle_midnight/battle', '/kcsapi/api_req_battle_midnight/sp_midnight', '/kcsapi/api_req_sortie/airbattle', '/kcsapi/api_req_combined_battle/battle_water'
         reportEnemy(body)
       when '/kcsapi/api_get_member/ship_deck', '/kcsapi/api_port/port'

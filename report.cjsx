@@ -2,7 +2,7 @@
 Promise = require 'bluebird'
 fs = Promise.promisifyAll require 'fs-extra'
 async = Promise.coroutine
-request = Promise.promisifyAll require 'request'
+request = Promise.promisifyAll require('request'), { multiArgs: true }
 {getTyku, sum, hashCode, HashTable} = require './common'
 path = require 'path'
 KCWIKI_HOST="dev.kcwiki.moe/kwks"
@@ -20,8 +20,8 @@ cache = new HashTable {}
 
 fs.readFileAsync CACHE_FILE, (err, data) ->
   cache = new HashTable JSON.parse data unless err?
-  console.log 'File not exist' if err?.code is 'ENOENT'
-  console.error err unless err?.code is 'ENOENT'
+  console.log 'Kcwiki reporter cache file not exist, will touch new one soon.' if err?.code is 'ENOENT'
+  console.error err.code if err?.code isnt 'ENOENT' and err?.code
 
 reportInit = ->
   drops = []
@@ -31,7 +31,7 @@ reportInit = ->
   _map = ''
   combined = false
 
-reportGetLoseItem = (body) ->
+reportGetLoseItem = async (body) ->
   _map = '' + body.api_maparea_id + body.api_mapinfo_no
   _path.push body.api_no
   # Report getitem data
@@ -44,7 +44,7 @@ reportGetLoseItem = (body) ->
       count : body.api_itemget.api_getcount
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info  
-      return request.postAsync "http://#{HOST}/getitem.action",
+      yield request.postAsync "http://#{HOST}/getitem.action",
         form:
           data: JSON.stringify info
       .spread (response, body) ->
@@ -63,13 +63,14 @@ reportGetLoseItem = (body) ->
       dantan: body.api_happening.dantan
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info
-      return request.postAsync "http://#{HOST}/dropitem.action",
+      yield request.postAsync "http://#{HOST}/dropitem.action",
         form:
           data: JSON.stringify info
       .spread (response, body) ->
         console.log "dropitem.action response: #{body}" if process.env.DEBUG?
         cache.put info
         return
+  return
 
 reportSlotItem = (body) ->
   if body.api_mst_slotitem?
@@ -80,12 +81,12 @@ reportSlotItem = (body) ->
     console.log "hashcode is #{hash}" if process.env.DEBUG?
     console.log "cache is #{JSON.stringify cache}" if process.env.DEBUG?
     try
-      return request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
+      return yield request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}").spread (response, data) ->
         console.log "comHash.action response: #{data}" if process.env.DEBUG?
         if data is "\"update\""
           console.log data
           # console.log JSON.stringify body.api_mst_slotitem
-          request.postAsync "http://#{HOST}/updateData.action",
+          return yield request.postAsync "http://#{HOST}/updateData.action",
             form:
               data: JSON.stringify body.api_mst_slotitem
           .spread (response, body) ->
@@ -95,7 +96,7 @@ reportSlotItem = (body) ->
       console.log err
 
 # Report enemy ship data
-reportEnemy = (body) ->
+reportEnemy = async (body) ->
   info = 
     id: body.api_ship_ke[1..]
     maxhp: body.api_maxhps[7..]
@@ -104,7 +105,7 @@ reportEnemy = (body) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss info
     try
-      return request.postAsync "http://#{HOST}/enemy.action",
+      yield request.postAsync "http://#{HOST}/enemy.action",
         form:
           data: JSON.stringify info
       .spread (response, body) ->
@@ -115,7 +116,7 @@ reportEnemy = (body) ->
       console.log err
 
 # data: JSON.stringify info
-reportShipAttr = (path) ->
+reportShipAttr = async (path) ->
   {_ships, _decks, _teitokuLv, _slotitems} = window
   drops = [] if 'port' in path
   if lvs.length isnt 0
@@ -136,9 +137,10 @@ reportShipAttr = (path) ->
           sakuteki: sakuteki
           taisen: taisen
           kaihi: kaihi
+          lv: lv
     if data.length > 0 and cache.miss data
       try
-        return request.postAsync "http://#{HOST}/attr.action",
+        yield request.postAsync "http://#{HOST}/attr.action",
           form:
             data: JSON.stringify data
         .spread (response, body) ->
@@ -151,7 +153,7 @@ reportShipAttr = (path) ->
     lvs = []
 
 # Report initial equip data
-reportInitEquipByDrop = (_ships)->
+reportInitEquipByDrop = async (_ships) ->
   if _.keys(__ships).length isnt 0
     _newShips = {}
     _keys = _.keys _ships
@@ -167,7 +169,7 @@ reportInitEquipByDrop = (_ships)->
       console.log JSON.stringify info if process.env.DEBUG?
       if cache.miss _newShips
         try
-          return request.postAsync "http://#{HOST}/initEquip.action",
+          yield request.postAsync "http://#{HOST}/initEquip.action",
             form:
               # data: JSON.stringify info
               ships: JSON.stringify _newShips
@@ -177,9 +179,10 @@ reportInitEquipByDrop = (_ships)->
             return
         catch err
           console.log err
+  return
 
 # Report initial equip data
-reportInitEquipByBuild = (body, _ships) ->
+reportInitEquipByBuild = async (body, _ships) ->
   ship = _ships[body.api_ship.api_id]
   slots = (_slotitems[slot].api_sortno for slot in ship.api_slot when slot isnt -1)
   data = {}
@@ -189,7 +192,7 @@ reportInitEquipByBuild = (body, _ships) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss data
     try
-      return request.postAsync "http://#{HOST}/initEquip.action",
+      yield request.postAsync "http://#{HOST}/initEquip.action",
         form:
           # data: JSON.stringify info
           ships: JSON.stringify data
@@ -199,9 +202,10 @@ reportInitEquipByBuild = (body, _ships) ->
         return
     catch err
       console.log err
+return
 
 # Report path data
-reportPath = (_decks)->
+reportPath = async (_decks)->
   if _path.length isnt 0
     decks = []
     decks[0] = (_ships[shipId].api_sortno for shipId in _decks[0].api_ship when shipId isnt -1)
@@ -213,7 +217,7 @@ reportPath = (_decks)->
     console.log JSON.stringify info if process.env.DEBUG?
     if cache.miss info
       try
-        return request.postAsync "http://#{HOST}/path.action",
+        yield request.postAsync "http://#{HOST}/path.action",
           form:
             data: JSON.stringify info
         .spread (response, body) ->
@@ -222,9 +226,10 @@ reportPath = (_decks)->
           return
       catch err
         console.log err
+  return
 
 # Report tyku data
-reoprtTyku = (detail) ->
+reoprtTyku = async (detail) ->
   {rank, map, mapCell, dropShipId, deckShipId } = detail
   {_teitokuLv, _nickName, _nickNameId, _decks} = window
   combined = true if deckShipId.length > 6
@@ -238,7 +243,7 @@ reoprtTyku = (detail) ->
     rank: rank
   if cache.miss info
     try
-      return request.postAsync "http://#{HOST}/tyku.action",
+      yield request.postAsync "http://#{HOST}/tyku.action",
         form:
           data: JSON.stringify info
       .spread (response, body) ->
@@ -247,11 +252,13 @@ reoprtTyku = (detail) ->
         return
     catch err
       console.log err
+  return
 
 cacheSync = ->
   fs.ensureDirSync path.join APPDATA_PATH, 'kcwiki-report'
-  fs.writeFileAsync CACHE_FILE, JSON.stringify(cache), (err) ->
-    console.error err if err?
+  console.log JSON.stringify cache.raw() if process.env.DEBUG?
+  fs.writeFileAsync CACHE_FILE, JSON.stringify(cache.raw()) , (err) ->
+    console.error JSON.stringify err if err
     console.log "Cache Sync Done." if process.env.DEBUG?
     return
 

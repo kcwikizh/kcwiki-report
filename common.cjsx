@@ -27,10 +27,9 @@ getTyku = (deck) ->
   alv: alvTyku
   total: totalTyku
 
-
 class HashTable
-  constructor: (@data) ->
-
+  constructor: (raw) ->
+    @data = raw if typeof raw is "object"
   miss: (key) ->
     not @data[@hash(key)]?
   put: (obj) ->
@@ -42,8 +41,6 @@ class HashTable
   raw: () ->
     @data
 
-
-
 sum = (arr) ->
   arr.reduce (total, item) -> total + item
 
@@ -54,7 +51,6 @@ hashCode = (val) ->
     h = h.charCodeAt(0) if typeof(h) is 'string';
     h = ((h << 5) - h) + ch.charCodeAt(0);
     h |= 0;
-
 
 module.exports =
   getTyku: getTyku

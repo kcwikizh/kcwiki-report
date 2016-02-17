@@ -97,6 +97,8 @@ reportEnemy = async (body) ->
     maxhp: body.api_maxhps[7..]
     slots: body.api_eSlot
     param: body.api_eParam
+    mapId: _maps
+    cellId: _path[-1..]
   console.log JSON.stringify info if process.env.DEBUG?
   if cache.miss info
     try

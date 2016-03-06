@@ -10,10 +10,19 @@
     "type": "git",
     "url": "git+https://github.com/kcwikizh/kcwiki-report.git"
   },
-  "author": "Grzhan",
+  "author": {
+    "name": "Grzhan",
+    "url": "https://github.com/grzhan"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kcwikizh/kcwiki-report/issues"
   },
-  "homepage": "https://github.com/kcwikizh/kcwiki-report#readme"
+  "homepage": "https://github.com/kcwikizh/kcwiki-report#readme",
+  "poiPlugin": {
+    "title": "舰娘百科数据收集",
+    "icon": "pie-chart",
+    "description": "舰娘百科数据收集插件",
+    "priority": 100
+  }
 }

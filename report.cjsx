@@ -6,15 +6,19 @@ request = Promise.promisifyAll require('request'), { multiArgs: true }
 {getTyku, sum, hashCode, HashTable} = require './common'
 path = require 'path'
 KCWIKI_HOST="dev.kcwiki.moe/kwks"
-TEST_HOST="133.130.100.133:8080/kwks"
+TEST_HOST="api.kcwiki.moe"
 CACHE_FILE= path.join APPDATA_PATH, 'kcwiki-report', 'cache.json'
 HOST = KCWIKI_HOST
+CACHE_SWITCH = 'off'
 
 drops = []
 lvs = []
 _path = []
 __ships = {}
+_remodelShips = []
 _map = ''
+_mapId = 0
+_mapAreaId = 0
 combined = false
 cache = new HashTable {}
 
@@ -29,25 +33,30 @@ reportInit = ->
   _path = []
   __ships = {}
   _map = ''
+  _mapId = 0
+  _mapAreaId = 0
   combined = false
 
 # Report map event (etc. get resource)
 reportGetLoseItem = async (body) ->
   _map = '' + body.api_maparea_id + body.api_mapinfo_no
+  _mapAreaId = body.api_maparea_id
+  _mapId = body.api_mapinfo_no
   _path.push body.api_no
   # Report getitem data
   if body.api_itemget?
     # Item ID: 1 油 2 弹
     info =
-      mapId : _map
-      cellId : body.api_no
-      itemId : body.api_itemget.api_id
-      count : body.api_itemget.api_getcount
+      mapAreaId: +_mapAreaId
+      mapId : +_mapId
+      cellId : +body.api_no
+      eventId : +body.api_itemget.api_id
+      count : +body.api_itemget.api_getcount
+      eventType: 0
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info  
-      [response, repData] = yield request.postAsync "http://#{HOST}/getitem.action",
-        form:
-          data: JSON.stringify info
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/mapEvent",
+        form: info
       console.log "getitem.action response: #{repData}" if process.env.DEBUG?    
       cache.put info
   # Report dropitem data
@@ -55,56 +64,36 @@ reportGetLoseItem = async (body) ->
     # Bullet - Type:1 IconId:2
     # Fuel - Type:1 IconId:1
     info = 
-      mapId : _map
-      cellId : body.api_no
-      typeId: body.api_happening.api_icon_id
-      count: body.api_happening.api_count
+      mapAreaId: +_mapAreaId
+      mapId : +_mapId
+      cellId : +body.api_no
+      eventId: +body.api_happening.api_icon_id
+      count: +body.api_happening.api_count
       dantan: body.api_happening.dantan
+      eventType: 1
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info
-      [response, repData] = yield request.postAsync "http://#{HOST}/dropitem.action",
-        form:
-          data: JSON.stringify info
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/mapEvent",
+        form: info
       console.log "dropitem.action response: #{repData}" if process.env.DEBUG?
       cache.put info
-  return
-
-# Report api_start2.api_mst_slotitem
-reportSlotItem = async (body) ->
-  if body.api_mst_slotitem?
-    start = (new Date()).getTime()
-    hash = hashCode JSON.stringify body.api_mst_slotitem
-    end = (new Date()).getTime()
-    console.log "the cost of hashCode: #{end-start}ms" if process.env.DEBUG?
-    console.log "hashcode is #{hash}" if process.env.DEBUG?
-    console.log "cache is #{JSON.stringify cache}" if process.env.DEBUG?
-    try
-      [response, repData] =  yield request.getAsync("http://#{HOST}/comHash.action?hash=#{hash}")
-      console.log "comHash.action response: #{repData}" if process.env.DEBUG?
-      if repData is "\"update\""
-        [response, repData] = yield request.postAsync "http://#{HOST}/updateData.action",
-          form:
-            data: JSON.stringify body.api_mst_slotitem
-        console.log "updateData.action response: #{repData}" if process.env.DEBUG?
-    catch err
-      console.log err
   return
 
 # Report enemy fleet data
 reportEnemy = async (body) ->
   info = 
-    id: body.api_ship_ke[1..]
-    maxhp: body.api_maxhps[7..]
+    enemyId: body.api_ship_ke[1..]
+    maxHP: body.api_maxhps[7..]
     slots: body.api_eSlot
     param: body.api_eParam
-    mapId: _maps
-    cellId: _path[-1..]
+    mapId: _mapId
+    mapAreaId: _mapAreaId
+    cellId: _path[-1..][0]
   console.log JSON.stringify info if process.env.DEBUG?
-  if cache.miss info
+  if CACHE_SWITCH is 'off' or cache.miss info
     try
-      [response, repData] = yield request.postAsync "http://#{HOST}/enemy.action",
-        form:
-          data: JSON.stringify info
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/enemy",
+        form: info
       console.log "enemy.action response: #{repData}" if process.env.DEBUG?
       cache.put info
     catch err
@@ -119,30 +108,28 @@ reportShipAttr = async (path) ->
     lvsNew = (_ships[deck].api_lv for deck in decks when deck isnt -1)
     data = []
     for lv,i in lvs 
-        continue if lv is lvsNew[i]
-        ship = _ships[decks[i]]
-        slots = ship.api_slot
-        luck = ship.api_luck[0] # 運
-        kaihi = ship.api_kaihi[0] # 回避
-        sakuteki = ship.api_sakuteki[0]　- sum (_slotitems[slot].api_saku for slot in slots when slot isnt -1) # 索敵
-        taisen = ship.api_taisen[0] - sum (_slotitems[slot].api_tais for slot in slots when slot isnt -1) # 対潜
-        data.push 
-          sortno: ship.api_sortno
-          luck: luck
-          sakuteki: sakuteki
-          taisen: taisen
-          kaihi: kaihi
-          lv: lvsNew[i]
-    if data.length > 0 and cache.miss data
-      try
-        [response, repData] = yield request.postAsync "http://#{HOST}/attr.action",
-          form:
-            data: JSON.stringify data
-        console.log "attr.action response: #{repData}" if process.env.DEBUG?
-        cache.put data
-      catch err
-        console.log err              
-      console.log JSON.stringify data if process.env.DEBUG?
+      continue if lv is lvsNew[i]
+      ship = _ships[decks[i]]
+      slots = ship.api_slot
+      luck = ship.api_luck[0] # 運
+      kaihi = ship.api_kaihi[0] # 回避
+      sakuteki = ship.api_sakuteki[0]　- sum (_slotitems[slot].api_saku for slot in slots when slot isnt -1) # 索敵
+      taisen = ship.api_taisen[0] - sum (_slotitems[slot].api_tais for slot in slots when slot isnt -1) # 対潜
+      info =
+        sortno: +ship.api_sortno
+        luck: +luck
+        sakuteki: +sakuteki
+        taisen: +taisen
+        kaihi: +kaihi
+        level: +lvsNew[i]
+      if CACHE_SWITCH is 'off' or cache.miss info
+        try
+          [response, repData] = yield request.postAsync "http://#{TEST_HOST}/shipAttr",
+            form: info
+          console.log "attr.action response: #{repData}" if process.env.DEBUG?
+          cache.put info
+        catch err
+          console.log err
     lvs = []
 
 # Report initial equip data
@@ -160,12 +147,10 @@ reportInitEquipByDrop = async (_ships) ->
         ships: _newShips
       __ships = {}
       console.log JSON.stringify info if process.env.DEBUG?
-      if cache.miss _newShips
+      if CACHE_SWITCH is 'off' or cache.miss _newShips
         try
-          [response, repData] = yield request.postAsync "http://#{HOST}/initEquip.action",
-            form:
-              # data: JSON.stringify info
-              ships: JSON.stringify _newShips
+          [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+            form: info
           console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
           cache.put _newShips
         catch err
@@ -181,17 +166,32 @@ reportInitEquipByBuild = async ((body, _ships) ->
   info =
     ships: data
   console.log JSON.stringify info if process.env.DEBUG?
-  if cache.miss data
+  if CACHE_SWITCH is 'off' or cache.miss data
     try
-      [response, repData] = yield request.postAsync "http://#{HOST}/initEquip.action",
-        form:
-          # data: JSON.stringify info
-          ships: JSON.stringify data
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+        form: info
       console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
       cache.put data
     catch err
       console.log err
   return )
+
+reportInitEquipByRemodel = async () ->
+  return if _remodelShips.length is 0
+  data = {}
+  for apiId in _remodelShips
+    ship = _ships[apiId]
+    data[ship] = (_slotitems[slot].api_sortno for slot in ship.api_slot when slot isnt -1)
+  if CACHE_SWITCH is 'off' or cache.miss data
+    try
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+        form:
+          ships: data
+      console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
+      cache.put data
+    catch err
+      console.log err
+  _remodelShips = []
 
 # Report path data
 reportPath = async (_decks)->
@@ -202,13 +202,13 @@ reportPath = async (_decks)->
     info = 
       path: _path
       decks: decks
-      map: _map
+      mapId: +_mapId
+      mapAreaId: +_mapAreaId
     console.log JSON.stringify info if process.env.DEBUG?
-    if cache.miss info
+    if CACHE_SWITCH is 'off' or cache.miss info
       try
-        [response, repData] = yield request.postAsync "http://#{HOST}/path.action",
-          form:
-            data: JSON.stringify info
+        [response, repData] = yield request.postAsync "http://#{TEST_HOST}/path",
+          form: info
         console.log "path.action response: #{repData}" if process.env.DEBUG?
         cache.put info
       catch err
@@ -223,17 +223,19 @@ reoprtTyku = async (detail) ->
   tyku = getTyku(_decks[0]).total
   tyku += getTyku(_decks[1]).total if deckShipId.length > 6
   console.log "Tyku value: #{tyku}" if process.env.DEBUG?
-  info = 
-    mapId: map
-    cellId: mapCell
+  return if tyku is 0
+  {api_no, api_maparea_id} = $maps[map]
+  info =
+    mapAreaId: +api_maparea_id 
+    mapId: +api_no
+    cellId: +mapCell
     tyku: tyku
     rank: rank
-  if cache.miss info
+  if CACHE_SWITCH is 'off' or cache.miss info
     try
-      [response, repData] = yield request.postAsync "http://#{HOST}/tyku.action",
-        form:
-          data: JSON.stringify info
-      console.log "tyku.action response: #{repData}" if process.env.DEBUG?
+      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/tyku",
+        form: info
+      console.log "Tyku api response: #{repData}" if process.env.DEBUG?
       cache.put info
     catch err
       console.log err
@@ -249,27 +251,31 @@ cacheSync = ->
     console.log "Cache Sync Done." if process.env.DEBUG?
     return
 
-handleMapStart = (_ships)->
+whenMapStart = (_ships)->
   combined = false
   _path = []
   __ships = _.clone _ships
 
-handleBattleResult = (_decks, _ships) ->
+whenBattleResult = (_decks, _ships) ->
   decks = []
   decks = (_decks[0].api_ship.concat _decks[1].api_ship)
   lvs = (_ships[deck].api_lv for deck in decks when deck isnt -1)
   console.log JSON.stringify lvs if process.env.DEBUG?
 
+whenRemodel = (body) ->
+  _remodelShips.push body.api_id
+
 module.exports = 
   reportInit: reportInit,
   reportGetLoseItem: reportGetLoseItem,
   reportEnemy: reportEnemy,
-  reportSlotItem: reportSlotItem,
   reportPath: reportPath,
   reportShipAttr: reportShipAttr,
   reoprtTyku: reoprtTyku,
   reportInitEquipByBuild: reportInitEquipByBuild,
   reportInitEquipByDrop: reportInitEquipByDrop,
-  handleBattleResult: handleBattleResult,
-  handleMapStart: handleMapStart
+  reportInitEquipByRemodel: reportInitEquipByRemodel,
+  whenBattleResult: whenBattleResult,
+  whenMapStart: whenMapStart
+  whenRemodel: whenRemodel
   cacheSync: cacheSync

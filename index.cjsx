@@ -10,7 +10,6 @@ handleBattleResult = (e) ->
 handleGameResponse = (e) ->
   {method, path, body, postBody} = e.detail
   {_ships, _decks, _teitokuLv} = window
-  console.log path if process.env.DEBUG?
   switch path
     when '/kcsapi/api_req_combined_battle/airbattle', '/kcsapi/api_req_combined_battle/battle', '/kcsapi/api_req_combined_battle/midnight_battle', '/kcsapi/api_req_combined_battle/sp_midnight', '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_battle_midnight/battle', '/kcsapi/api_req_battle_midnight/sp_midnight', '/kcsapi/api_req_sortie/airbattle', '/kcsapi/api_req_combined_battle/battle_water'
       reportEnemy(body)

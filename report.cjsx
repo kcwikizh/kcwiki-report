@@ -5,11 +5,10 @@ async = Promise.coroutine
 request = Promise.promisifyAll require('request'), { multiArgs: true }
 {getTyku, sum, hashCode, HashTable} = require './common'
 path = require 'path'
-KCWIKI_HOST="dev.kcwiki.moe/kwks"
-TEST_HOST="api.kcwiki.moe"
+KCWIKI_HOST="api.kcwiki.moe"
 CACHE_FILE= path.join APPDATA_PATH, 'kcwiki-report', 'cache.json'
 HOST = KCWIKI_HOST
-CACHE_SWITCH = 'off'
+CACHE_SWITCH = 'on'
 
 drops = []
 lvs = []
@@ -55,7 +54,7 @@ reportGetLoseItem = async (body) ->
       eventType: 0
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info  
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/mapEvent",
+      [response, repData] = yield request.postAsync "http://#{HOST}/mapEvent",
         form: info
       console.log "getitem.action response: #{repData}" if process.env.DEBUG?    
       cache.put info
@@ -73,7 +72,7 @@ reportGetLoseItem = async (body) ->
       eventType: 1
     console.log JSON.stringify info if process.env.DEBUG
     if cache.miss info
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/mapEvent",
+      [response, repData] = yield request.postAsync "http://#{HOST}/mapEvent",
         form: info
       console.log "dropitem.action response: #{repData}" if process.env.DEBUG?
       cache.put info
@@ -92,7 +91,7 @@ reportEnemy = async (body) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if CACHE_SWITCH is 'off' or cache.miss info
     try
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/enemy",
+      [response, repData] = yield request.postAsync "http://#{HOST}/enemy",
         form: info
       console.log "enemy.action response: #{repData}" if process.env.DEBUG?
       cache.put info
@@ -124,7 +123,7 @@ reportShipAttr = async (path) ->
         level: +lvsNew[i]
       if CACHE_SWITCH is 'off' or cache.miss info
         try
-          [response, repData] = yield request.postAsync "http://#{TEST_HOST}/shipAttr",
+          [response, repData] = yield request.postAsync "http://#{HOST}/shipAttr",
             form: info
           console.log "attr.action response: #{repData}" if process.env.DEBUG?
           cache.put info
@@ -149,7 +148,7 @@ reportInitEquipByDrop = async (_ships) ->
       console.log JSON.stringify info if process.env.DEBUG?
       if CACHE_SWITCH is 'off' or cache.miss _newShips
         try
-          [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+          [response, repData] = yield request.postAsync "http://#{HOST}/initEquip",
             form: info
           console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
           cache.put _newShips
@@ -168,7 +167,7 @@ reportInitEquipByBuild = async ((body, _ships) ->
   console.log JSON.stringify info if process.env.DEBUG?
   if CACHE_SWITCH is 'off' or cache.miss data
     try
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+      [response, repData] = yield request.postAsync "http://#{HOST}/initEquip",
         form: info
       console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
       cache.put data
@@ -184,7 +183,7 @@ reportInitEquipByRemodel = async () ->
     data[ship] = (_slotitems[slot].api_sortno for slot in ship.api_slot when slot isnt -1)
   if CACHE_SWITCH is 'off' or cache.miss data
     try
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/initEquip",
+      [response, repData] = yield request.postAsync "http://#{HOST}/initEquip",
         form:
           ships: data
       console.log "initEquip.action response: #{repData}" if process.env.DEBUG?
@@ -207,7 +206,7 @@ reportPath = async (_decks)->
     console.log JSON.stringify info if process.env.DEBUG?
     if CACHE_SWITCH is 'off' or cache.miss info
       try
-        [response, repData] = yield request.postAsync "http://#{TEST_HOST}/path",
+        [response, repData] = yield request.postAsync "http://#{HOST}/path",
           form: info
         console.log "path.action response: #{repData}" if process.env.DEBUG?
         cache.put info
@@ -233,7 +232,7 @@ reoprtTyku = async (detail) ->
     rank: rank
   if CACHE_SWITCH is 'off' or cache.miss info
     try
-      [response, repData] = yield request.postAsync "http://#{TEST_HOST}/tyku",
+      [response, repData] = yield request.postAsync "http://#{HOST}/tyku",
         form: info
       console.log "Tyku api response: #{repData}" if process.env.DEBUG?
       cache.put info
@@ -244,7 +243,6 @@ reoprtTyku = async (detail) ->
 cacheSync = ->
   fs.ensureDirSync path.join APPDATA_PATH, 'kcwiki-report'
   data = JSON.stringify cache.raw()
-  console.log data if process.env.DEBUG?
   cache.clear() if data.length > 1000000
   fs.writeFileAsync CACHE_FILE, data, (err) ->
     console.error JSON.stringify err if err

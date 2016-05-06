@@ -219,8 +219,7 @@ reoprtTyku = async (detail) ->
   {rank, map, mapCell, dropShipId, deckShipId } = detail
   {_teitokuLv, _nickName, _nickNameId, _decks} = window
   combined = true if deckShipId.length > 6
-  tyku = getTyku(_decks[0]).total
-  tyku += getTyku(_decks[1]).total if deckShipId.length > 6
+  tyku = getTyku(_decks[0]).min
   console.log "Tyku value: #{tyku}" if process.env.DEBUG?
   return if tyku is 0
   {api_no, api_maparea_id} = $maps[map]
@@ -230,6 +229,7 @@ reoprtTyku = async (detail) ->
     cellId: +mapCell
     tyku: tyku
     rank: rank
+    version: '2.0.1'
   if CACHE_SWITCH is 'off' or cache.miss info
     try
       [response, repData] = yield request.postAsync "http://#{HOST}/tyku",

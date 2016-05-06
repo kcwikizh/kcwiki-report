@@ -1,6 +1,6 @@
 {
   "name": "poi-plugin-kcwiki-report",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Report game data for kcwiki",
   "main": "index.cjsx",
   "scripts": {

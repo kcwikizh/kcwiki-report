@@ -22,6 +22,8 @@ handleGameResponse = (e) ->
       reportGetLoseItem(body)
     when '/kcsapi/api_req_map/next'
       reportGetLoseItem(body)
+    when '/kcsapi/api_get_member/material'
+      reportInitEquipByRemodel()
     when '/kcsapi/api_get_member/slot_item'
       reportInitEquipByDrop(_ships)
       reportPath(_decks)

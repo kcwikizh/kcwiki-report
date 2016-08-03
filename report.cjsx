@@ -1,4 +1,5 @@
 {_, SERVER_HOSTNAME, APPDATA_PATH} = window
+_ = require 'underscore' if _ is undefined
 Promise = require 'bluebird'
 fs = Promise.promisifyAll require 'fs-extra'
 async = Promise.coroutine

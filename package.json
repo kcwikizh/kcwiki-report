@@ -24,5 +24,8 @@
     "icon": "pie-chart",
     "description": "舰娘百科数据收集插件",
     "priority": 100
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
   }
 }

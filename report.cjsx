@@ -1,5 +1,9 @@
 {_, SERVER_HOSTNAME, APPDATA_PATH} = window
-_ = require 'underscore' if _ is undefined
+if _ is undefined
+  try
+    _ = require 'lodash'
+  catch err
+    _ = require 'underscore'
 Promise = require 'bluebird'
 fs = Promise.promisifyAll require 'fs-extra'
 async = Promise.coroutine
@@ -253,7 +257,7 @@ cacheSync = ->
 whenMapStart = (_ships)->
   combined = false
   _path = []
-  __ships = _.clone _ships
+  __ships = if _.cloneDeep isnt undefined then _.cloneDeep _ships else JSON.parse JSON.stringify _ships
 
 whenBattleResult = (_decks, _ships) ->
   decks = []

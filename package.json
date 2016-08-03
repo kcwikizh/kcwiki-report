@@ -26,6 +26,7 @@
     "priority": 100
   },
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "gulp-watch": "^4.3.9"
   }
 }

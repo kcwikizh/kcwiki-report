@@ -257,7 +257,7 @@ cacheSync = ->
 whenMapStart = (_ships)->
   combined = false
   _path = []
-  __ships = if _.cloneDeep isnt undefined then _.cloneDeep _ships else JSON.parse JSON.stringify _ships
+  __ships = JSON.parse JSON.stringify _ships
 
 whenBattleResult = (_decks, _ships) ->
   decks = []

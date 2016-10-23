@@ -1,6 +1,6 @@
 var gulp = require('gulp'),
 	watch = require('gulp-watch');
-var destDir = '../plugin_directory/poi-plugin-kcwiki-report';
+var destDir = '/Users/ivan_l/Library/Application Support/poi/plugins/node_modules/poi-plugin-kcwiki-report';
 
 // Sync files between git repo and local poi plugin directory
 gulp.task('watch', function() {

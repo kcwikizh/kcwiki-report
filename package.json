@@ -1,6 +1,6 @@
 {
   "name": "poi-plugin-kcwiki-report",
-  "version": "2.0.3",
+  "version": "3.0.0-bata.0",
   "description": "Report game data for kcwiki",
   "main": "index.es",
   "scripts": {
@@ -11,8 +11,8 @@
     "url": "git+https://github.com/kcwikizh/kcwiki-report.git"
   },
   "author": {
-    "name": "Grzhan",
-    "url": "https://github.com/grzhan"
+    "name": "iVanlIsh",
+    "url": "https://github.com/ivanlish"
   },
   "license": "MIT",
   "bugs": {

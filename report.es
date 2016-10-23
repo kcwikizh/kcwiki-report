@@ -1,5 +1,5 @@
 var { _, SERVER_HOSTNAME, APPDATA_PATH } = window;
-if (_ == undefined) {
+if (_ === "undefined") {
     try {
         _ = require('lodash');
     } catch(err) {
@@ -26,7 +26,7 @@ fs.readFile(CACHE_FILE, (err, data) => {
     if (typeof err !== "undefined" && err !== null && err.code && err.code != 'ENOENT') console.error(err.code);
 });
 
-var reportInit = ()=> {
+const reportInit = ()=> {
     drops = [];
     lvs = [];
     _path = [];
@@ -38,7 +38,7 @@ var reportInit = ()=> {
 };
 
 // Report map event (etc. get resource)
-var reportGetLoseItem = async (body) => {
+const reportGetLoseItem = async (body) => {
     _map = '' + body.api_maparea_id + body.api_mapinfo_no;
     _mapAreaId = body.api_maparea_id;
     _mapId = body.api_mapinfo_no;
@@ -88,7 +88,7 @@ var reportGetLoseItem = async (body) => {
 };
 
 // Report enemy fleet data
-var reportEnemy = async (body) => {
+const reportEnemy = async (body) => {
     info = {
         enemyId: body.api_ship_ke.slice(1),
         maxHP: body.api_maxhps.slice(7),
@@ -106,15 +106,15 @@ var reportEnemy = async (body) => {
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log("enemy.action response: #{repData}");
             cache.put(info);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 };
 
 // Report ship attributes
-var reportShipAttr = async (path) => {
+const reportShipAttr = async (path) => {
     let { _ships, _decks, _teitokuLv, _slotitems } = window._slotitems;
-    if ('port' in path) drops = [];
+    if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
         decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
         lvsNew = decks.filter(deck => deck != -1).forEach(deck => _ships[deck].api_lv);
@@ -152,7 +152,7 @@ var reportShipAttr = async (path) => {
 };
 
 // Report initial equip data
-var reportInitEquipByDrop = async (_ships) => {
+const reportInitEquipByDrop = async (_ships) => {
     if (_.keys(__ships).length != 0) {
         _newShips = {};
         _keys = _.keys(_ships);
@@ -177,7 +177,7 @@ var reportInitEquipByDrop = async (_ships) => {
                         console.log("initEquip.action response: #{repData}");
                     cache.put(_newShips);
                 } catch (err) {
-                    console.log(err);
+                    console.error(err);
                 }
             }
         }
@@ -186,7 +186,7 @@ var reportInitEquipByDrop = async (_ships) => {
 };
 
 // Report initial equip data
-var reportInitEquipByBuild = async (body, _ships) => {
+const reportInitEquipByBuild = async (body, _ships) => {
     ship = _ships[body.api_ship.api_id];
     slots = ship.api_slot.filter(slot => slot!=-1).forEach(slot=>_slotitems[slot].api_sortno);
     data = {};
@@ -204,13 +204,13 @@ var reportInitEquipByBuild = async (body, _ships) => {
                 console.log("initEquip.action response: #{repData}");
             cache.put(data);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
     return;
 };
 
-var reportInitEquipByRemodel = async () => {
+const reportInitEquipByRemodel = async () => {
     if (_remodelShips.length == 0) return;
     data = {};
     for (let apiId in _remodelShips) {
@@ -225,14 +225,14 @@ var reportInitEquipByRemodel = async () => {
                 console.log("initEquip.action response:  #{repData}");
             cache.put(data);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
     _remodelShips = [];
 };
 
 // Report path data
-var reportPath = async (_decks) => {
+const reportPath = async (_decks) => {
     if (_path.length != 0) {
         decks = [];
         decks[0] = _decks[0].api_ship.filter(shipId=>shipId != -1).forEach(shipId=>_ships[shipId].api_sortno);
@@ -254,7 +254,7 @@ var reportPath = async (_decks) => {
                     console.log("path.action response: #{repData}");
                 cache.put(info);
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         }
     }
@@ -262,7 +262,7 @@ var reportPath = async (_decks) => {
 };
 
 // Report tyku data
-var reoprtTyku = async (detail) => {
+const reoprtTyku = async (detail) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
@@ -287,15 +287,15 @@ var reoprtTyku = async (detail) => {
                 console.log("Tyku api response: #{repData}");
             cache.put(info);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
     return;
 };
 
-var cacheSync = () => {
+const cacheSync = () => {
     fs.ensureDirSync(path.join(APPDATA_PATH, 'kcwiki-report'));
-    data = JSON.stringify(cache.raw());
+    let data = JSON.stringify(cache.raw());
     if (data.length > 1000000) cache.clear();
     fs.writeFileAsync(CACHE_FILE, data, (err) => {
         if (err) console.error(JSON.stringify(err));
@@ -305,13 +305,13 @@ var cacheSync = () => {
     })
 };
 
-var whenMapStart = (_ships) => {
+const whenMapStart = (_ships) => {
     combined = false;
     _path = [];
     __ships = JSON.parse(JSON.stringify(_ships));
 };
 
-var whenBattleResult = (_decks, _ships) => {
+const whenBattleResult = (_decks, _ships) => {
     decks = [];
     decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
     lvs = decks.filter(deck=>deck != -1).forEach(deck=>_ships[deck].api_lv);
@@ -319,22 +319,22 @@ var whenBattleResult = (_decks, _ships) => {
         console.log(JSON.stringify(lvs));
 };
 
-var whenRemodel = (body) => {
+const whenRemodel = (body) => {
     _remodelShips.push(body.api_id);
 };
 
-module.exports = {
-    reportInit: reportInit,
-    reportGetLoseItem: reportGetLoseItem,
-    reportEnemy: reportEnemy,
-    reportPath: reportPath,
-    reportShipAttr: reportShipAttr,
-    reoprtTyku: reoprtTyku,
-    reportInitEquipByBuild: reportInitEquipByBuild,
-    reportInitEquipByDrop: reportInitEquipByDrop,
-    reportInitEquipByRemodel: reportInitEquipByRemodel,
-    whenBattleResult: whenBattleResult,
-    whenMapStart: whenMapStart,
-    whenRemodel: whenRemodel,
-    cacheSync: cacheSync
+export {
+    reportInit,
+    reportGetLoseItem,
+    reportEnemy,
+    reportPath,
+    reportShipAttr,
+    reoprtTyku,
+    reportInitEquipByBuild,
+    reportInitEquipByDrop,
+    reportInitEquipByRemodel,
+    whenBattleResult,
+    whenMapStart,
+    whenRemodel,
+    cacheSync
 };

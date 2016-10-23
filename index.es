@@ -1,19 +1,17 @@
-var SERVER_HOSTNAME = window.SERVER_HOSTNAME;
-Promise = require('bluebird');
-var async = Promise.coroutine;
-var {reportInit, reportEnemy,
+var {_, SERVER_HOSTNAME} = window;
+import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, reportPath,
-    whenBattleResult, reoprtTyku, cacheSync} = require('./report');
+    whenBattleResult, reoprtTyku, cacheSync } from './report';
 var handleBattleResult = (e) => {
     let {rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks, _ships} = window;
     whenBattleResult(_decks, _ships);
     reoprtTyku(e.detail);
 };
-var handleGameRespoense = (e) => {
+var handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
     let {_ships, _decks, _teitokuLv} = window;
     switch (path) {
@@ -61,18 +59,17 @@ var handleGameRequest = (e) => {
             break;
     }
 };
-module.exports = {
-    pluginDidLoad: (e) => {
+export const
+    pluginDidLoad = (e) => {
         reportInit();
-        window.addEventListener('game.respoense', handleGameRespoense());
-        window.addEventListener('game.request', handleGameRequest());
-        window.addEventListener('battle.result', handleBattleResult());
+        window.addEventListener('game.response', handleGameResponse);
+        window.addEventListener('game.request', handleGameRequest);
+        window.addEventListener('battle.result', handleBattleResult);
     },
-    pluginWillUnload: (e) => {
-        window.addEventListener('game.respoense', handleGameRespoense());
-        window.addEventListener('game.request', handleGameRequest());
-        window.addEventListener('battle.result', handleBattleResult());
+    pluginWillUnload = (e) => {
+        window.removeEventListener('game.response', handleGameResponse);
+        window.removeEventListener('battle.result', handleBattleResult);
+        window.removeEventListener('game.request', handleGameRequest);
     },
-    show: false
-};
+    show = false;
 

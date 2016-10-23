@@ -8,7 +8,7 @@ var aircraftLevelBonus = {
   '11': [0, 1, 1, 1, 1, 3, 3, 6, 6],
   '45': [0, 0, 0, 0, 0, 0, 0, 0, 0]
 };
-var getTyku = (deck) => {
+const getTyku = (deck) => {
     let {$ships, $slotitems, _ships, _slotitems} = window;
     let minTyku = 0, maxTyku = 0;
     for (let shipId in deck.api_ship) {
@@ -60,11 +60,11 @@ class HashTable {
     }
 }
 
-var sum = (arr) => {
+const sum = (arr) => {
     return arr.reduce((total,item)=>{return total+item});
 };
 
-var hashCode = (val) => {
+const hashCode = (val) => {
     return val.split('').reduce((h,ch) => {
         if (typeof(h)=="string") h = h.charCodeAt(0);
         h = ((h<<5)-h)+ch.charCodeAt(0);
@@ -72,9 +72,9 @@ var hashCode = (val) => {
     })
 };
 
-module.exports = {
-    getTyku: getTyku,
-    sum: sum,
-    hashCode: hashCode,
-    HashTable: HashTable
+export {
+    getTyku,
+    sum,
+    hashCode,
+    HashTable
 };

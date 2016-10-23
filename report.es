@@ -1,4 +1,4 @@
-var { _, SERVER_HOSTNAME, APPDATA_PATH } = window;
+let { _, SERVER_HOSTNAME, APPDATA_PATH } = window;
 if (_ === "undefined") {
     try {
         _ = require('lodash');
@@ -7,17 +7,17 @@ if (_ === "undefined") {
     }
 }
 Promise = require('bluebird');
-var fs = Promise.promisifyAll(require('fs-extra'));
-var request = Promise.promisifyAll(require('request'),{multiArgs: true});
+let fs = Promise.promisifyAll(require('fs-extra'));
+let request = Promise.promisifyAll(require('request'),{multiArgs: true});
 
 import { getTyku, sum, hashCode, HashTable } from './common';
 import path from 'path';
-var KCWIKI_HOST = 'api.kcwiki.moe';
-var CACHE_FILE = path.join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
-var HOST = KCWIKI_HOST;
-var CACHE_SWITCH = 'on';
+let KCWIKI_HOST = 'api.kcwiki.moe';
+let CACHE_FILE = path.join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
+let HOST = KCWIKI_HOST;
+let CACHE_SWITCH = 'on';
 
-var drops= [], lvs = [], _path = [], __ships = {}, _remodelShips = [], _map = '',
+let drops= [], lvs = [], _path = [], __ships = {}, _remodelShips = [], _map = '',
     _mapId = 0, _mapAreaId = 0, combined = false, cache = new HashTable({});
 
 fs.readFile(CACHE_FILE, (err, data) => {
@@ -46,7 +46,8 @@ const reportGetLoseItem = async (body) => {
     // Report getitem data
     if (typeof body.api_itemget !== "undifined" && body.api_itemget !== null) {
         // Item ID: 1 油 2 弹
-        info = {
+        console.log(body.api_itemget);
+        let info = {
             mapAreaId: +_mapAreaId,
             mapId: +_mapId,
             cellId: +body.api_no,
@@ -67,7 +68,7 @@ const reportGetLoseItem = async (body) => {
     if (typeof body.api_happening !== "undefined" && body.api_happening !==null && body.api_happening.api_type == 1) {
         // Bullet - Type:1 IconId:2
         // Fuel - Type:1 IconId:1
-        info = {
+        let info = {
             mapAreaId: +_mapAreaId,
             mapId: +_mapId,
             cellId: +body.api_no,
@@ -89,7 +90,7 @@ const reportGetLoseItem = async (body) => {
 
 // Report enemy fleet data
 const reportEnemy = async (body) => {
-    info = {
+    let info = {
         enemyId: body.api_ship_ke.slice(1),
         maxHP: body.api_maxhps.slice(7),
         slots: body.api_eSlot,
@@ -116,7 +117,7 @@ const reportShipAttr = async (path) => {
     let { _ships, _decks, _teitokuLv, _slotitems } = window._slotitems;
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
-        decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
+        let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
         lvsNew = decks.filter(deck => deck != -1).forEach(deck => _ships[deck].api_lv);
         data = [];
         for (let [lv, i] in lvs) {
@@ -127,7 +128,7 @@ const reportShipAttr = async (path) => {
             kaihi = ship.api_kaihi[0]; // 回避
             sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).forEach(slot => _slotitems[slot].api_saku));// 索敵
             taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).forEach(slot=>_slotitems[slot].api_tais));// 対潜
-            info = {
+            let info = {
                 sortno: +ship.api_sortno,
                 luck: +luck,
                 sakuteki: +sakuteki,
@@ -163,7 +164,7 @@ const reportInitEquipByDrop = async (_ships) => {
                 _newShips[_ships[key].api_sortno] = _ships[key].api_slot;
             for (let [shipno,slots] of _newShips)
                 _newShips[shipno] = slots.filter(slot=>slot!=-1).forEach(slot=> _slotitems[slot].api_sortno);
-            info = {
+            let info = {
                 ships: _newShips
             };
             __ships = {};
@@ -191,7 +192,7 @@ const reportInitEquipByBuild = async (body, _ships) => {
     slots = ship.api_slot.filter(slot => slot!=-1).forEach(slot=>_slotitems[slot].api_sortno);
     data = {};
     data[ship.api_sortno] = slots;
-    info = {
+    let info = {
         ships: data
     };
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
@@ -238,7 +239,7 @@ const reportPath = async (_decks) => {
         decks[0] = _decks[0].api_ship.filter(shipId=>shipId != -1).forEach(shipId=>_ships[shipId].api_sortno);
         if (combined)
             decks[1] = _decks[1].api_ship.filter(shipId=>shipId != -1).forEach(shipId=>_ships[shipId].api_sortno);
-        info = {
+        let info = {
             path: _path,
             decks: decks,
             mapId: +_mapId,
@@ -271,7 +272,7 @@ const reoprtTyku = async (detail) => {
         console.log("Tyku value: #{tyku}");
     if (tyku == 0) return;
     let {api_no, api_maparea_id} = $maps[map];
-    info = {
+    let info = {
         mapAreaId: +api_maparea_id,
         mapId: +api_no,
         cellId: +mapCell,

@@ -1,27 +1,27 @@
 // Tyku
 // 制空値= ∑ [艦載機の対空値 x √(搭載数) + √(熟練値/10) + 机种制空加值 ] ( [ ] 方括号代表取整)
-var aircraftExpTable = [0, 10, 25, 40, 55, 70, 85, 100, 121];
-var aircraftLevelBonus = {
-  '6': [0, 0, 2, 5, 9, 14, 14, 22, 22],
-  '7': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  '8': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  '11': [0, 1, 1, 1, 1, 3, 3, 6, 6],
-  '45': [0, 0, 0, 0, 0, 0, 0, 0, 0]
+const aircraftExpTable = [0, 10, 25, 40, 55, 70, 85, 100, 121];
+const aircraftLevelBonus = {
+    '6': [0, 0, 2, 5, 9, 14, 14, 22, 22],   // 艦上戦闘機
+    '7': [0, 0, 0, 0, 0, 0, 0, 0, 0],       // 艦上爆撃機
+    '8': [0, 0, 0, 0, 0, 0, 0, 0, 0],       // 艦上攻撃機
+    '11': [0, 1, 1, 1, 1, 3, 3, 6, 6],      // 水上爆撃機
+    '45': [0, 0, 2, 5, 9, 14, 14, 22, 22],  // 水上戦闘機
 };
 const getTyku = (deck) => {
     let {$ships, $slotitems, _ships, _slotitems} = window;
     let minTyku = 0, maxTyku = 0;
     for (let shipId in deck.api_ship) {
         if (shipId == -1) continue;
-        var ship = _ships[shipId];
+        let ship = _ships[shipId];
         console.log(ship.api_slot);
         for (let [itemId,slotId] of ship.api_slot) {
             if (itemId == -1 || typeof _slotitems[itemId] === "undefined" || _slotitems[itemId] === null) continue;
-            var item = _slotitems[itemId];
-            var tempTyku = 0.0;
+            let item = _slotitems[itemId];
+            let tempTyku = 0.0;
             //Basic tyku
 
-            var tempAlv = typeof item.api_alv !== "undefined" && item.api_alv !== null?item.api_alv:0;
+            let tempAlv = typeof item.api_alv !== "undefined" && item.api_alv !== null?item.api_alv:0;
             if (item.api_type[3] in [6,7,8]) {
                 tempTyku += Math.sqrt(ship.api_onslot[slotId]) * item.api_tyku;
                 tempTyku += aircraftLevelBonus[item.api_type[3]][tempAlv];

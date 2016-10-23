@@ -1,17 +1,17 @@
-var {_, SERVER_HOSTNAME} = window;
+let {_, SERVER_HOSTNAME} = window;
 import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, reportPath,
     whenBattleResult, reoprtTyku, cacheSync } from './report';
-var handleBattleResult = (e) => {
+let handleBattleResult = (e) => {
     let {rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks, _ships} = window;
     whenBattleResult(_decks, _ships);
     reoprtTyku(e.detail);
 };
-var handleGameResponse = (e) => {
+let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
     let {_ships, _decks, _teitokuLv} = window;
     switch (path) {
@@ -51,7 +51,7 @@ var handleGameResponse = (e) => {
             break;
     }
 };
-var handleGameRequest = (e) => {
+let handleGameRequest = (e) => {
     let {method, path, body} = e.detail;
     switch(path) {
         case '/kcsapi/api_req_kaisou/remodeling':

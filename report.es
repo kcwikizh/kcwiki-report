@@ -116,7 +116,8 @@ const reportEnemy = async (body) => {
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
-            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log(`enemy.action response: ${repData}`);
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                console.log(`enemy.action response: ${repData}`);
             cache.put(info);
         } catch (err) {
             console.error(err);

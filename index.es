@@ -1,5 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1;
+let seiku = -1, eSlot = [], eKyouka = [];
 import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -10,8 +10,9 @@ let handleBattleResult = (e) => {
     let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
     whenBattleResult(_decks, _ships);
-    reoprtTyku(e.detail, seiku);
+    reoprtTyku(eSlot, eKyouka, e.detail, seiku);
     seiku = -1;
+    eSlot = []; eKyouka = [];
 };
 let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
@@ -19,7 +20,6 @@ let handleGameResponse = (e) => {
     switch (path) {
         case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_sortie/battle':
-            seiku = body.api_kouku.api_stage1.api_disp_seiku;
         case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_sortie/airbattle':
         case '/kcsapi/api_req_combined_battle/midnight_battle':
@@ -27,6 +27,11 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_battle_midnight/battle':
         case '/kcsapi/api_req_battle_midnight/sp_midnight':
         case '/kcsapi/api_req_combined_battle/battle_water':
+            seiku = body.api_kouku.api_stage1.api_disp_seiku || -1;
+            if (typeof body.api_eSlot !== "undefined" && body.api_eSlot !== null)
+                eSlot = body.api_eSlot;
+            if (typeof body.api_eKyouka !== "undefined" && body.api_eKyouka !== null)
+                eKyouka = body.api_eKyouka;
             reportEnemy(body);
             break;
         case '/kcsapi/api_get_member/ship_deck':

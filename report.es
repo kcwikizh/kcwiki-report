@@ -79,9 +79,9 @@ const reportGetLoseItem = async (body) => {
             mapAreaId: +_mapAreaId,
             mapId: +_mapId,
             cellId: +body.api_no,
-            eventId: +body.api_happening.api_icon_id,
-            count: +body.api_happening.api_count,
-            dantan: body.api_happening.dantan,
+            eventId: [+body.api_happening.api_icon_id],
+            count: [+body.api_happening.api_count],
+            dentan: body.api_happening.api_dentan,
             eventType: 1
         };
         if (process.env.DEBUG) console.log(JSON.stringify(info));
@@ -131,7 +131,7 @@ const reportShipAttr = async (path) => {
     if (lvs.length != 0) {
         let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
-        data = [];
+        let data = [];
         for (let [lv, i] in lvs) {
             if (lv == lvsNew[i]) continue;
             ship = _ships[decks[i]];
@@ -285,11 +285,11 @@ const reportPath = async (_decks) => {
 };
 
 // Report tyku data
-const reoprtTyku = async (detail,seiku) => {
+const reoprtTyku = async (eSlot,eKouku,detail,seiku) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    let tyku = getTyku(_decks[0]).min;
+    let tyku = getTyku(eSlot,eKouku_decks[0]).min;
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(`Tyku value: ${tyku}`);
     if (tyku == 0) return;

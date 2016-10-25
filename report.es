@@ -44,18 +44,22 @@ const reportGetLoseItem = async (body) => {
     _mapId = body.api_mapinfo_no;
     _path.push(body.api_no);
     // Report getitem data
-    if (typeof body.api_itemget !== "undifined" && body.api_itemget !== null) {
+    if (typeof body.api_itemget !== "undefined" && body.api_itemget !== null) {
         // Item ID: 1 油 2 弹
-        console.log(body.api_itemget);
+        let eventId = [],count = [];
+        for (let item of body.api_itemget) {
+            eventId.push(+item.api_id);
+            count.push(+item.api_getcount);
+        }
         let info = {
             mapAreaId: +_mapAreaId,
             mapId: +_mapId,
             cellId: +body.api_no,
-            eventId: +body.api_itemget.api_id,
-            count: +body.api_itemget.api_getcount,
+            eventId: eventId,
+            count: count,
             eventType: 0
         };
-        if (typeof process.env.DEBUG !== "undifined" && process.env.DEBUG !== null)
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(JSON.stringify(info));
         if (cache.miss(info)) {
             [response, repData] = await request.postAsync("http://#{HOST}/mapEvent",
@@ -114,7 +118,7 @@ const reportEnemy = async (body) => {
 
 // Report ship attributes
 const reportShipAttr = async (path) => {
-    let { _ships, _decks, _teitokuLv, _slotitems } = window._slotitems;
+    let { _ships, _decks, _teitokuLv, _slotitems } = window;
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
         let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
@@ -235,7 +239,7 @@ const reportInitEquipByRemodel = async () => {
 // Report path data
 const reportPath = async (_decks) => {
     if (_path.length != 0) {
-        decks = [];
+        let decks = [];
         decks[0] = _decks[0].api_ship.filter(shipId=>shipId != -1).forEach(shipId=>_ships[shipId].api_sortno);
         if (combined)
             decks[1] = _decks[1].api_ship.filter(shipId=>shipId != -1).forEach(shipId=>_ships[shipId].api_sortno);
@@ -267,7 +271,8 @@ const reoprtTyku = async (detail) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    tyku = getTyku(_decks[0]).min;
+    console.log(_decks[0],getTyku(_decks[0]));
+    let tyku = getTyku(_decks[0]).min;
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log("Tyku value: #{tyku}");
     if (tyku == 0) return;
@@ -313,7 +318,7 @@ const whenMapStart = (_ships) => {
 };
 
 const whenBattleResult = (_decks, _ships) => {
-    decks = [];
+    let decks = [];
     decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
     lvs = decks.filter(deck=>deck != -1).forEach(deck=>_ships[deck].api_lv);
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)

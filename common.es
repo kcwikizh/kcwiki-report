@@ -8,35 +8,48 @@ const aircraftLevelBonus = {
     '11': [0, 1, 1, 1, 1, 3, 3, 6, 6],      // 水上爆撃機
     '45': [0, 0, 2, 5, 9, 14, 14, 22, 22],  // 水上戦闘機
 };
-const getTyku = (deck) => {
-    let {$ships, $slotitems, _ships, _slotitems} = window;
-    let minTyku = 0, maxTyku = 0;
-    for (let shipId in deck.api_ship) {
-        if (shipId == -1) continue;
-        let ship = _ships[shipId];
-        console.log(ship.api_slot);
-        for (let [itemId,slotId] of ship.api_slot) {
-            if (itemId == -1 || typeof _slotitems[itemId] === "undefined" || _slotitems[itemId] === null) continue;
-            let item = _slotitems[itemId];
-            let tempTyku = 0.0;
-            //Basic tyku
 
-            let tempAlv = typeof item.api_alv !== "undefined" && item.api_alv !== null?item.api_alv:0;
-            if (item.api_type[3] in [6,7,8]) {
-                tempTyku += Math.sqrt(ship.api_onslot[slotId]) * item.api_tyku;
-                tempTyku += aircraftLevelBonus[item.api_type[3]][tempAlv];
-                minTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv]/10));
-                maxTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv+1]/10));
-            } else if (item.api_type[3] == 10 && (item.api_type[2] == 11 || item.api_type[2] == 45)) {
-                tempTyku += Math.sqrt(ship.api_onslot[slotId]) * item.api_tyku;
-                tempTyku += aircraftLevelBonus[item.api_type[2]][tempAlv];
+const getTyku = (deck) => {
+    let minTyku = 0.0;
+    let maxTyku = 0.0;
+    let {$ships, $slotitems, _ships, _slotitems} = window;
+    for (let shipId of deck.api_ship) {
+        if (shipId == -1)
+            continue;
+        let ship = _ships[shipId];
+        for (let slotId in ship.api_slot) {
+            let itemId = ship.api_slot[slotId];
+            if (itemId == -1 || typeof _slotitems[itemId] === "undefined" || _slotitems[itemId] === null)
+                continue;
+            let _item = _slotitems[itemId];
+            let $item = $slotitems[_item.api_slotitem_id];
+            let tempTyku = 0.0;
+            let tempAlv;
+            // Basic tyku
+            if (_item.api_alv) {
+                tempAlv = +_item.api_alv;
+            } else {
+                tempAlv = 0.0;
+            }
+            if ([6, 7, 8].includes($item.api_type[3])) {
+                // 艦载機
+                tempTyku += Math.sqrt(ship.api_onslot[slotId]) * ($item.api_tyku + (_item.api_level || 0) * 0.2);
+                tempTyku += aircraftLevelBonus[$item.api_type[3]][tempAlv];
+                minTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv] / 10));
+                maxTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv + 1] / 10));
+            } else if ($item.api_type[3] == 10 && ($item.api_type[2] == 11 || $item.api_type[2] == 45)) {
+                // 水上機
+                tempTyku += Math.sqrt(ship.api_onslot[slotId]) * $item.api_tyku;
+                tempTyku += aircraftLevelBonus[$item.api_type[2]][tempAlv];
                 minTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv] / 10));
                 maxTyku += Math.floor(tempTyku + Math.sqrt(aircraftExpTable[tempAlv + 1] / 10));
             }
         }
     }
-    min: minTyku;
-    max: maxTyku;
+    return {
+        min: minTyku,
+        max: maxTyku,
+    }
 };
 
 class HashTable {

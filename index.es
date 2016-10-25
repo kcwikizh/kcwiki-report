@@ -6,8 +6,8 @@ import { reportInit, reportEnemy,
     reportInitEquipByRemodel, reportPath,
     whenBattleResult, reoprtTyku, cacheSync } from './report';
 let handleBattleResult = (e) => {
-    let {rank, map, mapCell, dropShipId, deckShipId } = e.detail;
-    let {_teitokuLv, _nickName, _nickNameId, _decks, _ships} = window;
+    let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
+    let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
     whenBattleResult(_decks, _ships);
     reoprtTyku(e.detail);
 };

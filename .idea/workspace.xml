@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1bf42c78-728b-4150-92c4-4c7f52c350d5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common.es" afterPath="$PROJECT_DIR$/common.es" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.es" afterPath="$PROJECT_DIR$/index.es" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/report.es" afterPath="$PROJECT_DIR$/report.es" />
     </list>
     <ignored path="kcwiki-report.iws" />
@@ -28,10 +26,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="common.es" pinned="false" current-in-tab="true">
+      <file leaf-file-name="common.es" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/common.es">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
+            <state relative-caret-position="-450">
               <caret line="28" column="32" selection-start-line="28" selection-start-column="32" selection-end-line="28" selection-end-column="32" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
@@ -62,11 +60,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="report.es" pinned="false" current-in-tab="false">
+      <file leaf-file-name="report.es" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/report.es">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="122" column="18" selection-start-line="122" selection-start-column="18" selection-end-line="122" selection-end-column="18" />
+            <state relative-caret-position="3933">
+              <caret line="273" column="0" selection-start-line="273" selection-start-column="0" selection-end-line="273" selection-end-column="0" />
               <folding>
                 <element signature="e#337#398#0" expanded="true" />
               </folding>
@@ -86,8 +84,8 @@
         <option value="$PROJECT_DIR$/index.cjsx" />
         <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/index.es" />
-        <option value="$PROJECT_DIR$/report.es" />
         <option value="$PROJECT_DIR$/common.es" />
+        <option value="$PROJECT_DIR$/report.es" />
       </list>
     </option>
   </component>
@@ -250,12 +248,12 @@
       <workItem from="1477133421799" duration="9567000" />
       <workItem from="1477194053069" duration="3322000" />
       <workItem from="1477209103378" duration="897000" />
-      <workItem from="1477223811433" duration="14402000" />
+      <workItem from="1477223811433" duration="15768000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="41793000" />
+    <option name="totallyTimeSpent" value="43159000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="6" />
@@ -478,6 +476,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/common.es">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-450">
+          <caret line="28" column="32" selection-start-line="28" selection-start-column="32" selection-end-line="28" selection-end-column="32" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/index.es">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
@@ -490,20 +498,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/report.es">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="122" column="18" selection-start-line="122" selection-start-column="18" selection-end-line="122" selection-end-column="18" />
+        <state relative-caret-position="3933">
+          <caret line="273" column="0" selection-start-line="273" selection-start-column="0" selection-end-line="273" selection-end-column="0" />
           <folding>
             <element signature="e#337#398#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common.es">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="28" column="32" selection-start-line="28" selection-start-column="32" selection-end-line="28" selection-end-column="32" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -63,7 +63,7 @@ const reportGetLoseItem = async (body) => {
             console.log(JSON.stringify(info));
         if (cache.miss(info)) {
             [response, repData] = await request.postAsync("http://#{HOST}/mapEvent",
-                form = info);
+                {form: info});
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log("getitem.action response: #{repData}");
             cache.put(info);
         }
@@ -84,7 +84,7 @@ const reportGetLoseItem = async (body) => {
         if (process.env.DEBUG) console.log(JSON.stringify(info));
         if (cache.miss(info)) {
             [response, repData] = await request.postAsync("http://#{HOST}/mapEvent",
-                form = info);
+                {form: info});
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log("dropitem.action response: #{repData}");
             cache.put(info);
         }
@@ -107,7 +107,7 @@ const reportEnemy = async (body) => {
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             [response, repData] = await request.postAsync("http://#{HOST}/enemy",
-                form = info);
+                {form: info});
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log("enemy.action response: #{repData}");
             cache.put(info);
         } catch (err) {
@@ -143,7 +143,7 @@ const reportShipAttr = async (path) => {
             if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                 try {
                     [response, repData] = await request.postAsync("http://#{HOST}/shipAttr",
-                        form = info);
+                        {form: info});
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log("attr.action response: #{repData}");
                     cache.put(info);
@@ -159,10 +159,10 @@ const reportShipAttr = async (path) => {
 // Report initial equip data
 const reportInitEquipByDrop = async (_ships) => {
     if (_.keys(__ships).length != 0) {
-        _newShips = {};
-        _keys = _.keys(_ships);
-        __keys = _.keys(__ships);
-        _newKeys = _.difference(_keys,__keys);
+        let _newShips = {};
+        let _keys = _.keys(_ships);
+        let __keys = _.keys(__ships);
+        let _newKeys = _.difference(_keys,__keys);
         if (_newKeys.length > 0) {
             for (let key in _newKeys)
                 _newShips[_ships[key].api_sortno] = _ships[key].api_slot;
@@ -177,7 +177,7 @@ const reportInitEquipByDrop = async (_ships) => {
             if (CACHE_SWITCH == 'off' || cache.miss(_newShips)) {
                 try {
                     [response, repData] = await request.postAsync("http://#{HOST}/initEquip",
-                        form = info);
+                        {form: info});
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log("initEquip.action response: #{repData}");
                     cache.put(_newShips);
@@ -204,7 +204,7 @@ const reportInitEquipByBuild = async (body, _ships) => {
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
             [response, repData] = await request.postAsync("http://#{HOST}/initEquip",
-                form = info);
+                {form: info});
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log("initEquip.action response: #{repData}");
             cache.put(data);
@@ -271,7 +271,6 @@ const reoprtTyku = async (detail) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    console.log(_decks[0],getTyku(_decks[0]));
     let tyku = getTyku(_decks[0]).min;
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log("Tyku value: #{tyku}");
@@ -320,7 +319,7 @@ const whenMapStart = (_ships) => {
 const whenBattleResult = (_decks, _ships) => {
     let decks = [];
     decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
-    lvs = decks.filter(deck=>deck != -1).forEach(deck=>_ships[deck].api_lv);
+    lvs = decks.filter(deck=>deck != -1).forEach(deck=>_ships[deck].api_lv) || [];
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(JSON.stringify(lvs));
 };

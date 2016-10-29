@@ -53,11 +53,12 @@ const getTyku = (deck) => {
 };
 
 class HashTable {
+    data;
     constructor(raw) {
-        if (typeof(raw) == "object") this.data = raw;
+        if (typeof raw == "object") this.data = raw;
     }
     miss(key) {
-        return this.data[this.hash(key)] === "undefined" || this.data[this.hash(key)] === null;
+        return typeof this.data[this.hash(key)] === "undefined" || this.data[this.hash(key)] === null;
     }
     put(obj) {
         this.data[this.hash(obj)] = true;
@@ -79,9 +80,10 @@ const sum = (arr) => {
 
 const hashCode = (val) => {
     return val.split('').reduce((h,ch) => {
-        if (typeof(h)=="string") h = h.charCodeAt(0);
+        if (typeof h == "string") h = h.charCodeAt(0);
         h = ((h<<5)-h)+ch.charCodeAt(0);
         h |= 0;
+        return h;
     })
 };
 

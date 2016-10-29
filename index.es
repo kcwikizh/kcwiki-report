@@ -1,4 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
+let seiku = -1;
 import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -9,20 +10,22 @@ let handleBattleResult = (e) => {
     let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
     whenBattleResult(_decks, _ships);
-    reoprtTyku(e.detail);
+    reoprtTyku(e.detail, seiku);
+    seiku = -1;
 };
 let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
-    let {_ships, _decks, _teitokuLv} = window;
+    let {_ships, _decks, _teitokuLv, _nickName, _nickNameId} = window;
     switch (path) {
-        case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_combined_battle/battle':
+        case '/kcsapi/api_req_sortie/battle':
+            seiku = body.api_kouku.api_stage1.api_disp_seiku;
+        case '/kcsapi/api_req_combined_battle/airbattle':
+        case '/kcsapi/api_req_sortie/airbattle':
         case '/kcsapi/api_req_combined_battle/midnight_battle':
         case '/kcsapi/api_req_combined_battle/sp_midnight':
-        case '/kcsapi/api_req_sortie/battle':
         case '/kcsapi/api_req_battle_midnight/battle':
         case '/kcsapi/api_req_battle_midnight/sp_midnight':
-        case '/kcsapi/api_req_sortie/airbattle' :
         case '/kcsapi/api_req_combined_battle/battle_water':
             reportEnemy(body);
             break;
@@ -68,8 +71,8 @@ export const
     },
     pluginWillUnload = (e) => {
         window.removeEventListener('game.response', handleGameResponse);
-        window.removeEventListener('battle.result', handleBattleResult);
         window.removeEventListener('game.request', handleGameRequest);
+        window.removeEventListener('battle.result', handleBattleResult);
     },
     show = false;
 

@@ -1,5 +1,10 @@
 let {_, SERVER_HOSTNAME} = window;
+<<<<<<< HEAD
 let seiku = -1, eSlot = [], eKyouka = [];
+||||||| parent of 1b84438... bug fixed
+=======
+let seiku = -1;
+>>>>>>> 1b84438... bug fixed
 import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -10,18 +15,33 @@ let handleBattleResult = (e) => {
     let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
     whenBattleResult(_decks, _ships);
+<<<<<<< HEAD
     reoprtTyku(eSlot, eKyouka, e.detail, seiku);
     seiku = -1;
     eSlot = []; eKyouka = [];
+||||||| parent of 1b84438... bug fixed
+    reoprtTyku(e.detail);
+=======
+    reoprtTyku(e.detail, seiku);
+    seiku = -1;
+>>>>>>> 1b84438... bug fixed
 };
 let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
     let {_ships, _decks, _teitokuLv, _nickName, _nickNameId} = window;
     switch (path) {
         case '/kcsapi/api_req_combined_battle/battle':
+<<<<<<< HEAD
         case '/kcsapi/api_req_sortie/battle':
         case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_sortie/airbattle':
+||||||| parent of 1b84438... bug fixed
+=======
+        case '/kcsapi/api_req_sortie/battle':
+            seiku = body.api_kouku.api_stage1.api_disp_seiku;
+        case '/kcsapi/api_req_combined_battle/airbattle':
+        case '/kcsapi/api_req_sortie/airbattle':
+>>>>>>> 1b84438... bug fixed
         case '/kcsapi/api_req_combined_battle/midnight_battle':
         case '/kcsapi/api_req_combined_battle/sp_midnight':
         case '/kcsapi/api_req_battle_midnight/battle':

@@ -290,7 +290,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    let tyku = getTyku(eSlot,eKouku_decks[0]).min;
+    let tyku = getTyku(_decks[0]).min;
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(`Tyku value: ${tyku}`);
     if (tyku == 0) return;

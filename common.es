@@ -9,7 +9,7 @@ const aircraftLevelBonus = {
     '45': [0, 0, 2, 5, 9, 14, 14, 22, 22],  // 水上戦闘機
 };
 
-const getTyku = (eSlot,eKouku,deck) => {
+const getTyku = (deck) => {
     let minTyku = 0.0;
     let maxTyku = 0.0;
     let {$ships, $slotitems, _ships, _slotitems} = window;

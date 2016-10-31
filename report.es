@@ -133,14 +133,14 @@ const reportShipAttr = async (path) => {
         let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
         let data = [];
-        for (let [lv, i] in lvs) {
+        for (let [lv, i] of lvs) {
             if (lv == lvsNew[i]) continue;
-            ship = _ships[decks[i]];
-            slots = ship.api_slot;
-            luck = ship.api_luck[0]; // 運
-            kaihi = ship.api_kaihi[0]; // 回避
-            sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
-            taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+            let ship = _ships[decks[i]];
+            let slots = ship.api_slot;
+            let luck = ship.api_luck[0]; // 運
+            let kaihi = ship.api_kaihi[0]; // 回避
+            let sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
+            let taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
             let info = {
                 sortno: +ship.api_sortno,
                 luck: +luck,

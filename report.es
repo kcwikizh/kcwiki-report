@@ -253,38 +253,6 @@ const reportInitEquipByRemodel = async () => {
     _remodelShips = [];
 };
 
-// Report path data
-const reportPath = async (_decks) => {
-    if (_path.length != 0) {
-        let decks = [];
-        decks[0] = _decks[0].api_ship.filter(shipId=>shipId != -1).map(shipId=>_ships[shipId].api_sortno);
-        if (combined)
-            decks[1] = _decks[1].api_ship.filter(shipId=>shipId != -1).map(shipId=>_ships[shipId].api_sortno);
-        let info = {
-            path: _path,
-            decks: decks,
-            mapId: +_mapId,
-            mapAreaId: +_mapAreaId
-        };
-        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-            console.log(JSON.stringify(info));
-        if (CACHE_SWITCH == 'off' || cache.miss(info)) {
-            try {
-                let response = await request.postAsync(`http://${HOST}/path`, {form: info});
-                let status = response.statusCode, repData = response.body;
-                if (status >= 300)
-                    console.log(status,response.statusMessage);
-                if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-                    console.log(`path.action response: ${repData}`);
-                cache.put(info);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    }
-    return;
-};
-
 // Report tyku data
 const reoprtTyku = async (eSlot,eKouku,detail,seiku) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
@@ -355,7 +323,6 @@ export {
     reportInit,
     reportGetLoseItem,
     reportEnemy,
-    reportPath,
     reportShipAttr,
     reoprtTyku,
     reportInitEquipByBuild,

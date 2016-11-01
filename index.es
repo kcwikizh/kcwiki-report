@@ -4,8 +4,8 @@ import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
-    reportInitEquipByRemodel, reportPath,
-    whenBattleResult, reoprtTyku, cacheSync } from './report';
+    reportInitEquipByRemodel, whenBattleResult,
+    reoprtTyku, cacheSync } from './report';
 let handleBattleResult = (e) => {
     let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
@@ -52,7 +52,6 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_get_member/slot_item':
             reportInitEquipByDrop(_ships);
-            reportPath(_decks);
             break;
         case '/kcsapi/api_req_kousyou/getship':
             reportInitEquipByBuild(body, _ships);

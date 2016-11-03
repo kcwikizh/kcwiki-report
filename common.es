@@ -10,8 +10,6 @@ const aircraftLevelBonus = {
 };
 
 const getTyku = (deck) => {
-    console.log(deck);
-    debugger;
     let minTyku = 0;
     let maxTyku = 0;
     let {$ships, $slotitems, _ships, _slotitems} = window;

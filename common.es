@@ -10,8 +10,10 @@ const aircraftLevelBonus = {
 };
 
 const getTyku = (deck) => {
-    let minTyku = 0.0;
-    let maxTyku = 0.0;
+    console.log(deck);
+    debugger;
+    let minTyku = 0;
+    let maxTyku = 0;
     let {$ships, $slotitems, _ships, _slotitems} = window;
     for (let shipId of deck.api_ship) {
         if (shipId == -1)
@@ -29,7 +31,7 @@ const getTyku = (deck) => {
             if (_item.api_alv) {
                 tempAlv = +_item.api_alv;
             } else {
-                tempAlv = 0.0;
+                tempAlv = 0;
             }
             if ([6, 7, 8].includes($item.api_type[3])) {
                 // 艦载機

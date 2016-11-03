@@ -1,5 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0;
 import { reportInit, reportEnemy,
     reportShipAttr, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -10,7 +10,7 @@ let handleBattleResult = (e) => {
     let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
     let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
     whenBattleResult(_decks, _ships);
-    reoprtTyku(eSlot, eKyouka, e.detail, seiku);
+    reoprtTyku(eSlot, eKyouka, e.detail, seiku, dock_id);
     seiku = -1;
     eSlot = []; eKyouka = [];
 };
@@ -32,6 +32,8 @@ let handleGameResponse = (e) => {
                 eSlot = body.api_eSlot;
             if (typeof body.api_eKyouka !== "undefined" && body.api_eKyouka !== null)
                 eKyouka = body.api_eKyouka;
+            if (typeof body.api_dock_id !== "undefined" && body.api_dock_id !== null)
+                dock_id = body.api_dock_id;
             reportEnemy(body);
             break;
         case '/kcsapi/api_get_member/ship_deck':

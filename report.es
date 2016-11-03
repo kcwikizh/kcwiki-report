@@ -133,7 +133,8 @@ const reportShipAttr = async (path) => {
         let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
         let data = [];
-        for (let [lv, i] of lvs) {
+        for (let i in lvs) {
+            let lv = lvs[i];
             if (lv == lvsNew[i]) continue;
             let ship = _ships[decks[i]];
             let slots = ship.api_slot;
@@ -286,11 +287,11 @@ const reportPath = async (_decks) => {
 };
 
 // Report tyku data
-const reoprtTyku = async (eSlot,eKouku,detail,seiku) => {
+const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    let tyku = getTyku(_decks[0]).min;
+    let tyku = getTyku(_decks[dock_id-1]).max;
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(`Tyku value: ${tyku}`);
     if (tyku == 0) return;

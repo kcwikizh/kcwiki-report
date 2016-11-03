@@ -7,12 +7,14 @@ import { reportInit, reportEnemy,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync } from './report';
 let handleBattleResult = (e) => {
-    let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
-    let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
-    whenBattleResult(_decks, _ships);
-    reoprtTyku(eSlot, eKyouka, e.detail, seiku, dock_id);
-    seiku = -1;
-    eSlot = []; eKyouka = [];
+    if (seiku != -1) {
+        let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
+        let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
+        whenBattleResult(_decks, _ships);
+        reoprtTyku(eSlot, eKyouka, e.detail, seiku, dock_id);
+        seiku = -1;
+        eSlot = []; eKyouka = [];
+    }
 };
 let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail;
@@ -27,7 +29,11 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_battle_midnight/battle':
         case '/kcsapi/api_req_battle_midnight/sp_midnight':
         case '/kcsapi/api_req_combined_battle/battle_water':
-            seiku = body.api_kouku.api_stage1.api_disp_seiku || -1;
+            if (typeof body.api_kouku !== "undefined" && body.api_kouku !== null 
+            && typeof body.api_kouku.api_stage1 !== "undefined" && body.api_kouku.api_stage1 !== null
+            && typeof body.api_kouku.api_stage1.api_disp_seiku !== "undefined" 
+            && body.api_kouku.api_stage1.api_disp_seiku !== null)
+                seiku = body.api_kouku.api_stage1.api_disp_seiku || -1;
             if (typeof body.api_eSlot !== "undefined" && body.api_eSlot !== null)
                 eSlot = body.api_eSlot;
             if (typeof body.api_eKyouka !== "undefined" && body.api_eKyouka !== null)

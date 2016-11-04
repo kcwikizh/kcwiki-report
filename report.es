@@ -81,7 +81,7 @@ const reportGetLoseItem = async (body) => {
             cellId: +body.api_no,
             eventId: [+body.api_happening.api_icon_id],
             count: [+body.api_happening.api_count],
-            dentan: body.api_happening.api_dentan,
+            dantan: body.api_happening.api_dentan,
             eventType: 1
         };
         if (process.env.DEBUG) console.log(JSON.stringify(info));
@@ -150,6 +150,8 @@ const reportShipAttr = async (path) => {
                 kaihi: +kaihi,
                 level: +lvsNew[i]
             };
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                console.log(JSON.stringify(info));
             if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                 try {
                     let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
@@ -206,9 +208,9 @@ const reportInitEquipByDrop = async (_ships) => {
 
 // Report initial equip data
 const reportInitEquipByBuild = async (body, _ships) => {
-    ship = _ships[body.api_ship.api_id];
-    slots = ship.api_slot.filter(slot => slot!=-1).map(slot=>_slotitems[slot].api_sortno);
-    data = {};
+    let ship = _ships[body.api_ship.api_id];
+    let slots = ship.api_slot.filter(slot => slot!=-1).map(slot=>_slotitems[slot].api_sortno);
+    let data = {};
     data[ship.api_sortno] = slots;
     let info = {
         ships: data
@@ -233,9 +235,9 @@ const reportInitEquipByBuild = async (body, _ships) => {
 
 const reportInitEquipByRemodel = async () => {
     if (_remodelShips.length == 0) return;
-    data = {};
+    let data = {};
     for (let apiId in _remodelShips) {
-        ship = _ships[apiId];
+        let ship = _ships[apiId];
         data[ship] = ship.api_slot.filter(slot=> slot != -1).map(slot=>_slotitems[slot].api_sortno);
     }
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {

@@ -126,11 +126,11 @@ const reportEnemy = async (body) => {
 };
 
 // Report ship attributes
-const reportShipAttr = async (path) => {
+const reportShipAttrByLevelUp = async (path) => {
     let { _ships, _decks, _teitokuLv, _slotitems } = window;
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
-        let decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
+        let decks = (_decks[0].api_ship.concat(_decks[1].api_ship)).concat(_decks[2].api_ship).concat(_decks[3].api_ship);
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
         let data = [];
         for (let i in lvs) {
@@ -167,6 +167,37 @@ const reportShipAttr = async (path) => {
             }
         }
         lvs = [];
+    }
+};
+const reportShipAttr = async (ship) => {
+    let {_slotitems} = window;
+    let slots = ship.api_slot;
+    let luck = ship.api_lucky[0]; // 運
+    let kaihi = ship.api_kaihi[0]; // 回避
+    let sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
+    let taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+    let info = {
+        sortno: +ship.api_sortno,
+        luck: +luck,
+        sakuteki: +sakuteki,
+        taisen: +taisen,
+        kaihi: +kaihi,
+        level: +ship.api_lv
+    };
+    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(JSON.stringify(info));
+    if (CACHE_SWITCH == 'off' || cache.miss(info)) {
+        try {
+            let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+            let status = response.statusCode, repData = response.body;
+            if (status >= 300)
+                console.log(status,response.statusMessage);
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                console.log(`attr.action response: ${repData}`);
+            cache.put(info);
+        } catch (err) {
+            console.log(err);
+        }
     }
 };
 
@@ -312,7 +343,7 @@ const whenMapStart = (_ships) => {
 
 const whenBattleResult = (_decks, _ships) => {
     let decks = [];
-    decks = (_decks[0].api_ship.concat(_decks[1].api_ship));
+    decks = _decks[0].api_ship.concat(_decks[1].api_ship).concat(_decks[2].api_ship).concat(_decks[3].api_ship);
     lvs = decks.filter(deck=>deck != -1).map(deck=>_ships[deck].api_lv) || [];
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(JSON.stringify(lvs));

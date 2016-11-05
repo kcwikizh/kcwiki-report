@@ -44,7 +44,7 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_get_member/ship_deck':
         case '/kcsapi/api_port/port':
-            reportShipAttr(path);
+            reportShipAttrByLevelUp(path);
             reportInitEquipByRemodel();
             cacheSync();
             break;
@@ -59,11 +59,19 @@ let handleGameResponse = (e) => {
             reportInitEquipByRemodel();
             break;
         case '/kcsapi/api_get_member/slot_item':
-            reportInitEquipByDrop(_ships);
+            reportInitEquip(_ships);
             break;
         case '/kcsapi/api_req_kousyou/getship':
+            reportShipAttr(body.api_ship);
             reportInitEquipByBuild(body, _ships);
             break;
+        //case '/kcsapi/api_req_kaisou/powerup':
+        //    reportShipAttr(body.api_ship);
+        //    whenRemodel(body);
+        //    break;
+        //case 'api_req_kaisou/marriage':
+        //    reportShipAttr(body.api_data);
+        //    break;
     }
 };
 let handleGameRequest = (e) => {

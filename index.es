@@ -59,7 +59,7 @@ let handleGameResponse = (e) => {
             reportInitEquipByRemodel();
             break;
         case '/kcsapi/api_get_member/slot_item':
-            reportInitEquip(_ships);
+            reportInitEquipByDrop(_ships);
             break;
         case '/kcsapi/api_req_kousyou/getship':
             reportShipAttr(body.api_ship);

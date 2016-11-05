@@ -1,7 +1,7 @@
 let {_, SERVER_HOSTNAME} = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0;
 import { reportInit, reportEnemy,
-    reportShipAttr, whenMapStart,
+    reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,

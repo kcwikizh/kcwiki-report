@@ -357,6 +357,7 @@ export {
     reportInit,
     reportGetLoseItem,
     reportEnemy,
+    reportShipAttrByLevelUp,
     reportShipAttr,
     reoprtTyku,
     reportInitEquipByBuild,

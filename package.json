@@ -1,6 +1,6 @@
 {
   "name": "poi-plugin-kcwiki-report",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Report game data for kcwiki",
   "main": "index.es",
   "scripts": {
@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
-    "babel-preset-es2017": "^6.16.0",
     "dotenv": "^2.0.0",
     "gulp": "^3.9.1",
     "gulp-watch": "^4.3.9"

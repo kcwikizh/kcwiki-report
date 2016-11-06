@@ -203,16 +203,48 @@ const reportShipAttr = async (ship) => {
 
 // Report initial equip data
 const reportInitEquipByDrop = async (_ships) => {
+    let {_slotitems} = window;
     if (_.keys(__ships).length != 0) {
         let _newShips = {};
         let _keys = _.keys(_ships);
         let __keys = _.keys(__ships);
         let _newKeys = _.difference(_keys,__keys);
         if (_newKeys.length > 0) {
-            for (let key in _newKeys)
+            for (let key of _newKeys) {
                 _newShips[_ships[key].api_sortno] = _ships[key].api_slot;
-            for (let [shipno,slots] of _newShips)
+                let slots = _ships[key].api_slot;
+                let luck = _ships[key].api_lucky[0]; // 運
+                let kaihi = _ships[key].api_kaihi[0]; // 回避
+                let sakuteki = _ships[key].api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
+                let taisen = _ships[key].api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+                let info = {
+                    sortno: +_ships[key].api_sortno,
+                    luck: +luck,
+                    sakuteki: +sakuteki,
+                    taisen: +taisen,
+                    kaihi: +kaihi,
+                    level: +_ships[key].api_lv
+                };
+                if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                    console.log(JSON.stringify(info));
+                if (CACHE_SWITCH == 'off' || cache.miss(info)) {
+                    try {
+                        let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+                        let status = response.statusCode, repData = response.body;
+                        if (status >= 300)
+                            console.log(status,response.statusMessage);
+                        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                            console.log(`attr.action response: ${repData}`);
+                        cache.put(info);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+            }
+            for (let shipno in _newShips) {
+                let slots = _newShips[shipno];
                 _newShips[shipno] = slots.filter(slot=>slot!=-1).map(slot=> _slotitems[slot].api_sortno);
+            }
             let info = {
                 ships: _newShips
             };

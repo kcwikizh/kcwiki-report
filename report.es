@@ -324,17 +324,17 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
-    let tyku = getTyku(_decks[dock_id-1]).max;
+    let {maxTyku,minTyku} = getTyku(_decks[dock_id-1]);
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-        console.log(`Tyku value: ${tyku}`);
-    if (tyku == 0) return;
+        console.log(`Tyku value: ${minTyku}, ${maxTyku}`);
     let {api_no, api_maparea_id} = $maps[map];
     //-1=数据缺失, 0=制空均衡, 1=制空権確保, 2=航空優勢, 3=航空劣勢, 4=制空権喪失
     let info = {
         mapAreaId: +api_maparea_id,
         mapId: +api_no,
         cellId: +mapCell,
-        tyku: tyku,
+        minTyku: minTyku,
+        maxTyku: maxTyku,
         rank: rank,
         seiku: seiku,
         version: '3.0.0-bata.0'

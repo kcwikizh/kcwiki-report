@@ -47,8 +47,8 @@ const getTyku = (deck) => {
         }
     }
     return {
-        min: minTyku,
-        max: maxTyku,
+        minTyku: minTyku,
+        maxTyku: maxTyku,
     }
 };
 

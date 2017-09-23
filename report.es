@@ -320,7 +320,7 @@ const reportInitEquipByRemodel = async () => {
 };
 
 // Report tyku data
-const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id) => {
+const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
     let {rank, map, mapCell, dropShipId, deckShipId} = detail;
     let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
     if (deckShipId.length > 6) combined = true;
@@ -337,6 +337,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id) => {
         maxTyku: maxTyku,
         rank: rank,
         seiku: seiku,
+        shipId: ship_id,
         version: '3.0.0-bata.0'
     };
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {

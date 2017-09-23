@@ -1,5 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0;
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [];
 import { reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -11,14 +11,16 @@ let handleBattleResult = (e) => {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
         let { _teitokuLv, _nickName, _nickNameId, _decks, _ships } = window;
         whenBattleResult(_decks, _ships);
-        reoprtTyku(eSlot, eKyouka, e.detail, seiku, dock_id);
+        reoprtTyku(eSlot, eKyouka, e.detail, seiku, dock_id, ship_id);
         seiku = -1;
         eSlot = []; eKyouka = [];
     }
 };
 let handleGameResponse = (e) => {
-    let {method, path, body, postBody} = e.detail;
+    let {method, path, body, postBody} = e.detail? e.detail : e;
     let {_ships, _decks, _teitokuLv, _nickName, _nickNameId} = window;
+    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) 
+        console.log(method, path, JSON.stringify(body), JSON.stringify(postBody));
     switch (path) {
         case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_sortie/battle':
@@ -29,6 +31,8 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_battle_midnight/battle':
         case '/kcsapi/api_req_battle_midnight/sp_midnight':
         case '/kcsapi/api_req_combined_battle/battle_water':
+            if (typeof body.api_ship_ke !== "undefined" && body.api_ship_ke !== null)
+                ship_ke = body.api_ship_ke;
             if (typeof body.api_kouku !== "undefined" && body.api_kouku !== null 
             && typeof body.api_kouku.api_stage1 !== "undefined" && body.api_kouku.api_stage1 !== null
             && typeof body.api_kouku.api_stage1.api_disp_seiku !== "undefined" 
@@ -75,7 +79,7 @@ let handleGameResponse = (e) => {
     }
 };
 let handleGameRequest = (e) => {
-    let {method, path, body} = e.detail;
+    let {method, path, body} = e.detail? e.detail : e;
     switch(path) {
         case '/kcsapi/api_req_kaisou/remodeling':
             whenRemodel(body);

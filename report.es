@@ -130,7 +130,10 @@ const reportShipAttrByLevelUp = async (path) => {
     let { _ships, _decks, _teitokuLv, _slotitems } = window;
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
-        let decks = (_decks[0].api_ship.concat(_decks[1].api_ship)).concat(_decks[2].api_ship).concat(_decks[3].api_ship);
+        let decks = [];
+        _decks.map(v => {
+            decks = decks.concat(v.api_ship);
+        })
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
         let data = [];
         for (let i in lvs) {
@@ -376,7 +379,9 @@ const whenMapStart = (_ships) => {
 
 const whenBattleResult = (_decks, _ships) => {
     let decks = [];
-    decks = _decks[0].api_ship.concat(_decks[1].api_ship).concat(_decks[2].api_ship).concat(_decks[3].api_ship);
+    _decks.map(v => {
+        decks = decks.concat(v.api_ship);
+    })
     lvs = decks.filter(deck=>deck != -1).map(deck=>_ships[deck].api_lv) || [];
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(JSON.stringify(lvs));

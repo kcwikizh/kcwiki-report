@@ -1,11 +1,11 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1;
 import { reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
-    reoprtTyku, cacheSync } from './report';
+    reoprtTyku, cacheSync, reportExpedition } from './report';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
@@ -48,15 +48,23 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_get_member/ship_deck':
         case '/kcsapi/api_port/port':
+            reportExpedition(mapinfo_nos, maparear_id, cell_ids);
+            mapinfo_nos = -1;
+            maparear_id = -1;
+            cell_ids = [];
             reportShipAttrByLevelUp(path);
             reportInitEquipByRemodel();
             cacheSync();
             break;
         case '/kcsapi/api_req_map/start':
+            mapinfo_no = body.api_mapinfo_no;
+            maparear_id = body.api_maparea_id;
+            cell_ids.push(body.api_no);
             whenMapStart(_ships);
             reportGetLoseItem(body);
             break;
         case '/kcsapi/api_req_map/next':
+            cell_ids.push(body.api_no);
             reportGetLoseItem(body);
             break;
         case '/kcsapi/api_get_member/material':

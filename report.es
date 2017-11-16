@@ -359,6 +359,30 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
     return;
 };
 
+// Report fleets and mapinfos
+const reportExpedition = async (mapinfo_no, maparea_id, cell_ids) => {
+    let info = {
+        mapAreaId: maparea_id,
+        mapId: mapinfo_no,
+        cellId: cell_ids,
+        ships: __ships,
+        version: '3.0.4'
+    };
+    if (CACHE_SWITCH == 'off' || cache.miss(data)) {
+        try {
+            let response = await request.postAsync(`http://${HOST}/expedition`, {form: info});
+            let status = response.statusCode, repData = response.body;
+            if (status >= 300)
+                console.log(status,response.statusMessage);
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                console.log(`expedition.action response:  ${repData}`);
+            cache.put(data);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+};
+
 const cacheSync = () => {
     fs.ensureDirSync(path.join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -401,6 +425,7 @@ export {
     reportInitEquipByBuild,
     reportInitEquipByDrop,
     reportInitEquipByRemodel,
+    reportExpedition,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

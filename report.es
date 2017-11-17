@@ -101,8 +101,8 @@ const reportGetLoseItem = async (body) => {
 // Report enemy fleet data
 const reportEnemy = async (body) => {
     let info = {
-        enemyId: body.api_ship_ke.slice(1),
-        maxHP: body.api_maxhps.slice(7),
+        enemyId: body.api_ship_ke,
+        maxHP: body.api_e_maxhps,
         slots: body.api_eSlot,
         param: body.api_eParam,
         mapId: _mapId,
@@ -343,6 +343,8 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
         shipId: ship_id,
         version: '3.0.0-bata.0'
     };
+    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/tyku`, {form: info});
@@ -363,16 +365,21 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
     let ships = [];
     for (let ship_id of _decks[dock_id].api_ship) {
-        ships.push(_ships[ship_id].api_ship_id);
+        if (ship_id != -1)
+            ships.push(_ships[ship_id].api_ship_id);
+        else
+            ships.push(-1);
     }
-    if (!cellId || cellId.length == 0) return;
+    if (!cell_ids || cell_ids.length == 0) return;
     let info = {
-        mapAreaId: maparea_id,
-        mapId: mapinfo_no,
-        cellId: cell_ids,
-        ships: ships,
-        version: '3.0.4'
+        mapAreaId: +maparea_id,
+        mapId: +mapinfo_no,
+        cellId: JSON.stringify(cell_ids),
+        ships: JSON.stringify(ships),
+        version: '3.0.8'
     };
+    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/expedition`, {form: info});

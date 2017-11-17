@@ -19,8 +19,6 @@ let handleBattleResult = (e) => {
 let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail? e.detail : e;
     let {_ships, _decks, _teitokuLv, _nickName, _nickNameId} = window;
-    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) 
-        console.log(method, path, JSON.stringify(body), JSON.stringify(postBody));
     switch (path) {
         case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_sortie/battle':

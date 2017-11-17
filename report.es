@@ -362,8 +362,10 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 // Report fleets and mapinfos
 const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
     let ships = [];
-    for (let ship_id in _decks[dock_id].api_ship)
+    for (let ship_id of _decks[dock_id].api_ship) {
         ships.push(_ships[ship_id].api_ship_id);
+    }
+    if (!cellId || cellId.length == 0) return;
     let info = {
         mapAreaId: maparea_id,
         mapId: mapinfo_no,
@@ -371,7 +373,7 @@ const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_i
         ships: ships,
         version: '3.0.4'
     };
-    if (CACHE_SWITCH == 'off' || cache.miss(data)) {
+    if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/expedition`, {form: info});
             let status = response.statusCode, repData = response.body;

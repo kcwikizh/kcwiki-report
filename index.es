@@ -48,9 +48,7 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_get_member/ship_deck':
         case '/kcsapi/api_port/port':
-            reportExpedition(mapinfo_nos, maparear_id, cell_ids, _decks, dock_id, _ships);
-            mapinfo_nos = -1;
-            maparear_id = -1;
+            reportExpedition(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
             cell_ids = [];
             reportShipAttrByLevelUp(path);
             reportInitEquipByRemodel();

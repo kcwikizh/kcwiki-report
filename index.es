@@ -44,10 +44,10 @@ let handleGameResponse = (e) => {
                 dock_id = body.api_dock_id;
             reportEnemy(body);
             break;
-        case '/kcsapi/api_get_member/ship_deck':
         case '/kcsapi/api_port/port':
             reportExpedition(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
             cell_ids = [];
+        case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);
             reportInitEquipByRemodel();
             cacheSync();

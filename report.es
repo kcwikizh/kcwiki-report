@@ -100,6 +100,7 @@ const reportGetLoseItem = async (body) => {
 
 // Report enemy fleet data
 const reportEnemy = async (body) => {
+    if (_mapAreaId != 40) return;
     let info = {
         enemyId: body.api_ship_ke,
         maxHP: body.api_e_maxhps,
@@ -374,8 +375,8 @@ const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_i
     let info = {
         mapAreaId: +maparea_id,
         mapId: +mapinfo_no,
-        cellId: JSON.stringify(cell_ids),
-        ships: JSON.stringify(ships),
+        cellId: cell_ids,
+        ships: ships,
         version: '3.0.8'
     };
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)

@@ -100,6 +100,7 @@ const reportGetLoseItem = async (body) => {
 
 // Report enemy fleet data
 const reportEnemy = async (body) => {
+    if (_mapAreaId != 40) return;
     let info = {
         enemyId: body.api_ship_ke,
         maxHP: body.api_e_maxhps,

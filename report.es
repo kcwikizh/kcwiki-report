@@ -389,7 +389,7 @@ const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_i
                 console.log(status,response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`expedition.action response:  ${repData}`);
-            cache.put(data);
+            cache.put(info);
         } catch (err) {
             console.error(err);
         }

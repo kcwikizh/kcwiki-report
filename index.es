@@ -5,7 +5,7 @@ import { reportInit, reportEnemy,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
-    reoprtTyku, cacheSync, reportExpedition } from './report';
+    reoprtTyku, cacheSync, reportBattle} from './report';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
@@ -42,10 +42,17 @@ let handleGameResponse = (e) => {
                 eKyouka = body.api_eKyouka;
             if (typeof body.api_dock_id !== "undefined" && body.api_dock_id !== null)
                 dock_id = body.api_dock_id;
+            /*
+            在20171117更新中，至少
+            '/kcsapi/api_req_sortie/battle'
+            的api中的api_dock_id修改了拼写，变为api_deck_id，导致dock_id没有被正确赋值
+            */
+            if (typeof body.api_deck_id !== "undefined" && body.api_deck_id !== null)
+                dock_id = body.api_deck_id;
             reportEnemy(body);
             break;
         case '/kcsapi/api_port/port':
-            reportExpedition(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
+            reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
             cell_ids = [];
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);

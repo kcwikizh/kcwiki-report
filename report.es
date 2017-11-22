@@ -363,7 +363,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 };
 
 // Report fleets and mapinfos
-const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
+const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
     let ships = [];
     for (let ship_id of _decks[dock_id].api_ship) {
         if (ship_id != -1)
@@ -375,8 +375,8 @@ const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_i
     let info = {
         mapAreaId: +maparea_id,
         mapId: +mapinfo_no,
-        cellId: JSON.stringify(cell_ids),
-        ships: JSON.stringify(ships),
+        cellId: cell_ids,
+        ships: ships,
         version: '3.0.8'
     };
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
@@ -388,7 +388,7 @@ const reportExpedition = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_i
             if (status >= 300)
                 console.log(status,response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-                console.log(`expedition.action response:  ${repData}`);
+                console.log(`battle.action response:  ${repData}`);
             cache.put(info);
         } catch (err) {
             console.error(err);
@@ -438,7 +438,7 @@ export {
     reportInitEquipByBuild,
     reportInitEquipByDrop,
     reportInitEquipByRemodel,
-    reportExpedition,
+    reportBattle,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

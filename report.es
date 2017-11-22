@@ -438,7 +438,7 @@ export {
     reportInitEquipByBuild,
     reportInitEquipByDrop,
     reportInitEquipByRemodel,
-    reportExpedition,
+    reportBattle,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

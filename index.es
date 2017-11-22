@@ -42,6 +42,13 @@ let handleGameResponse = (e) => {
                 eKyouka = body.api_eKyouka;
             if (typeof body.api_dock_id !== "undefined" && body.api_dock_id !== null)
                 dock_id = body.api_dock_id;
+            /*
+            在20171117更新中，至少
+            '/kcsapi/api_req_sortie/battle'
+            的api中的api_dock_id修改了拼写，变为api_deck_id，导致dock_id没有被正确赋值
+            */
+            if (typeof body.api_deck_id !== "undefined" && body.api_deck_id !== null)
+                dock_id = body.api_deck_id;
             reportEnemy(body);
             break;
         case '/kcsapi/api_port/port':

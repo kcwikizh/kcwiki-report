@@ -5,7 +5,7 @@ import { reportInit, reportEnemy,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
-    reoprtTyku, cacheSync, reportExpedition } from './report';
+    reoprtTyku, cacheSync, reportBattle} from './report';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
@@ -45,7 +45,7 @@ let handleGameResponse = (e) => {
             reportEnemy(body);
             break;
         case '/kcsapi/api_port/port':
-            reportExpedition(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
+            reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
             cell_ids = [];
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);

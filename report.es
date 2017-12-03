@@ -97,14 +97,13 @@ const reportGetLoseItem = async (body) => {
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`dropitem.action response: ${repData}`);
             cache.put(info);
-        }
     }
+        }
     return;
 };
 
 // Report enemy fleet data
 const reportEnemy = async (body) => {
-    if (_mapAreaId != 40) return;
     let info = {
         enemyId: body.api_ship_ke,
         maxHP: body.api_e_maxhps,
@@ -322,6 +321,7 @@ const reportInitEquipByRemodel = async () => {
     if (_remodelShips.length == 0) return;
     let data = {};
     for (let apiId in _remodelShips) {
+        apiId = parseInt(apiId);
         let ship = _ships[apiId];
         data[ship] = ship.api_slot.filter(slot=> slot != -1).map(slot=>_slotitems[slot].api_sortno);
     }
@@ -386,6 +386,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 
 // Report fleets and mapinfos
 const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
+    if (_mapId == 1) return;
     let ships = [];
     for (let ship_id of _decks[dock_id].api_ship) {
         if (ship_id != -1)

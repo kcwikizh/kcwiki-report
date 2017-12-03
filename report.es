@@ -137,15 +137,13 @@ const reportShipAttrByLevelUp = async (path) => {
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
         let decks = [];
-        _decks.map(v => {
-            decks = decks.concat(v.api_ship);
-        })
         let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
         let data = [];
         for (let i in lvs) {
             let lv = lvs[i];
             if (lv == lvsNew[i]) continue;
             let ship = _ships[decks[i]];
+            if (ship == -1) continue;
             let slots = ship.api_slot;
             let luck = ship.api_luck[0]; // 運
             let kaihi = ship.api_kaihi[0]; // 回避
@@ -318,6 +316,10 @@ const reportInitEquipByBuild = async (body, _ships) => {
 };
 
 const reportInitEquipByRemodel = async () => {
+    /* if (_remodelShips.length > 0) {
+        console.log(_remodelShips);
+        debugger;
+    } */
     if (_remodelShips.length == 0) return;
     let data = {};
     for (let apiId in _remodelShips) {
@@ -386,7 +388,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 
 // Report fleets and mapinfos
 const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
-    if (_mapId == 1) return;
+    if (mapinfo_no == 1 && maparea_id == 1) return;
     let ships = [];
     for (let ship_id of _decks[dock_id].api_ship) {
         if (ship_id != -1)

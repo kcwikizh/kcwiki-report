@@ -63,6 +63,8 @@ const reportGetLoseItem = async (body) => {
             console.log(JSON.stringify(info));
         if (cache.miss(info)) {
             let response = await request.postAsync(`http://${HOST}/mapEvent`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -87,6 +89,8 @@ const reportGetLoseItem = async (body) => {
         if (process.env.DEBUG) console.log(JSON.stringify(info));
         if (cache.miss(info)) {
             let response = await request.postAsync(`http://${HOST}/mapEvent`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -114,6 +118,8 @@ const reportEnemy = async (body) => {
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/enemy`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -159,6 +165,8 @@ const reportShipAttrByLevelUp = async (path) => {
             if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                 try {
                     let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+                    if (window.POI_VERSION >= 'v8.0.0')
+                      response = response[0];
                     let status = response.statusCode, repData = response.body;
                     if (status >= 300)
                         console.log(status,response.statusMessage);
@@ -193,6 +201,8 @@ const reportShipAttr = async (ship) => {
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -234,11 +244,15 @@ const reportInitEquipByDrop = async (_ships) => {
                 if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                     try {
                         let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+                        if (window.POI_VERSION >= 'v8.0.0')
+                          response = response[0];
                         let status = response.statusCode, repData = response.body;
                         if (status >= 300)
                             console.log(status,response.statusMessage);
-                        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+                        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) {
+                            console.log(response)
                             console.log(`attr.action response: ${repData}`);
+                        }
                         cache.put(info);
                     } catch (err) {
                         console.log(err);
@@ -258,6 +272,8 @@ const reportInitEquipByDrop = async (_ships) => {
             if (CACHE_SWITCH == 'off' || cache.miss(_newShips)) {
                 try {
                     let response = await request.postAsync(`http://${HOST}/initEquip`, {form: info});
+                    if (window.POI_VERSION >= 'v8.0.0')
+                      response = response[0];
                     let status = response.statusCode, repData = response.body;
                     if (status >= 300)
                         console.log(status,response.statusMessage);
@@ -287,6 +303,8 @@ const reportInitEquipByBuild = async (body, _ships) => {
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
             let response = await request.postAsync(`http://${HOST}/initEquip`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -310,6 +328,8 @@ const reportInitEquipByRemodel = async () => {
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
             let response = await request.postAsync(`http://${HOST}/initEquip`, {form: {ships: data}});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
@@ -349,10 +369,12 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/tyku`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);
-            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) 
                 console.log(`Tyku api response: ${repData}`);
             cache.put(info);
         } catch (err) {
@@ -384,6 +406,8 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
             let response = await request.postAsync(`http://${HOST}/expedition`, {form: info});
+            if (window.POI_VERSION >= 'v8.0.0')
+                response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
                 console.log(status,response.statusMessage);

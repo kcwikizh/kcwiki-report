@@ -11,9 +11,9 @@ let fs = Promise.promisifyAll(require('fs-extra'));
 let request = Promise.promisifyAll(require('request'),{multiArgs: true});
 
 import { getTyku, sum, hashCode, HashTable } from './common';
-import path from 'path';
+import {join} from 'path';
 let KCWIKI_HOST = 'api.kcwiki.moe';
-let CACHE_FILE = path.join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
+let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
 let HOST = KCWIKI_HOST;
 let CACHE_SWITCH = 'on';
 
@@ -137,18 +137,24 @@ const reportShipAttrByLevelUp = async (path) => {
     if (path.includes('port')) drops = [];
     if (lvs.length != 0) {
         let decks = [];
-        let lvsNew = decks.filter(deck => deck != -1).map(deck => _ships[deck].api_lv);
+        _decks.map(v => {
+            decks = decks.concat(v.api_ship);
+        })
+        let lvsNew = decks.map(deck => {
+            if (deck == -1)
+                return -1
+            return _ships[deck].api_lv
+        });
         let data = [];
         for (let i in lvs) {
             let lv = lvs[i];
-            if (lv == lvsNew[i]) continue;
+            if (lv == lvsNew[i] || lv == -1 || decks[i] == -1) continue;
             let ship = _ships[decks[i]];
-            if (ship == -1) continue;
-            let slots = ship.api_slot;
+            let ship_slots = ship.api_slot;
             let luck = ship.api_luck[0]; // 運
             let kaihi = ship.api_kaihi[0]; // 回避
-            let sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
-            let taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+            let sakuteki = ship.api_sakuteki[0] - sum(ship_slots.filter(ship_slot=>ship_slot != -1).map(ship_slot => _slotitems[ship_slot].api_saku));// 索敵
+            let taisen = ship.api_taisen[0] - sum(ship_slots.filter(ship_slot => ship_slot != -1).map(ship_slot=>_slotitems[ship_slot].api_tais));// 対潜
             let info = {
                 sortno: +ship.api_sortno,
                 luck: +luck,
@@ -316,10 +322,6 @@ const reportInitEquipByBuild = async (body, _ships) => {
 };
 
 const reportInitEquipByRemodel = async () => {
-    /* if (_remodelShips.length > 0) {
-        console.log(_remodelShips);
-        debugger;
-    } */
     if (_remodelShips.length == 0) return;
     let data = {};
     for (let apiId in _remodelShips) {
@@ -424,7 +426,7 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
 };
 
 const cacheSync = () => {
-    fs.ensureDirSync(path.join(APPDATA_PATH, 'kcwiki-report'));
+    fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
     if (data.length > 1000000) cache.clear();
     fs.writeFileAsync(CACHE_FILE, data, (err) => {
@@ -446,7 +448,11 @@ const whenBattleResult = (_decks, _ships) => {
     _decks.map(v => {
         decks = decks.concat(v.api_ship);
     });
-    lvs = decks.filter(deck=>deck != -1).map(deck=>_ships[deck].api_lv) || [];
+    lvs = decks.map(deck => {
+        if (deck == -1)
+            return -1
+        return _ships[deck].api_lv
+    }) || [];
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(JSON.stringify(lvs));
 };

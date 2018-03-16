@@ -74,18 +74,14 @@ class HashTable {
     }
 }
 
-const sum = (arr) => {
-    return arr.reduce((total,item)=>{return total+item});
-};
+const sum = arr => arr.reduce((total,item) => total + item, 0);
 
-const hashCode = (val) => {
-    return val.split('').reduce((h,ch) => {
-        if (typeof h == "string") h = h.charCodeAt(0);
-        h = ((h<<5)-h)+ch.charCodeAt(0);
-        h |= 0;
-        return h;
-    })
-};
+const hashCode = val => val.split('').reduce((h,ch) => {
+    if (typeof h == "string") h = h.charCodeAt(0);
+    h = ((h<<5)-h)+ch.charCodeAt(0);
+    h |= 0;
+    return h;
+}, 0);
 
 export {
     getTyku,

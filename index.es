@@ -24,11 +24,17 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_sortie/battle':
         case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_sortie/airbattle':
+        case '/kcsapi/api_req_combined_battle/ld_airbattle':
         case '/kcsapi/api_req_combined_battle/midnight_battle':
         case '/kcsapi/api_req_combined_battle/sp_midnight':
         case '/kcsapi/api_req_battle_midnight/battle':
         case '/kcsapi/api_req_battle_midnight/sp_midnight':
         case '/kcsapi/api_req_combined_battle/battle_water':
+        case '/kcsapi/api_req_combined_battle/ec_battle':
+        case '/kcsapi/api_req_combined_battle/ec_midnight_battle':
+        case '/kcsapi/api_req_combined_battle/each_battle':
+        case '/kcsapi/api_req_combined_battle/each_battle_water':
+        case '/kcsapi/api_req_combined_battle/ec_night_to_day':
             if (typeof body.api_ship_ke !== "undefined" && body.api_ship_ke !== null)
                 ship_ke = body.api_ship_ke;
             if (typeof body.api_kouku !== "undefined" && body.api_kouku !== null 

@@ -1,5 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1;
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], cellData = [];
 import { reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -59,8 +59,10 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
-            reportBattleV2(mapinfo_no, maparear_id, cell_ids, dock_id);
+            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id);
             cell_ids = [];
+            cellData = [];
+            break;
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);
             reportInitEquipByRemodel();
@@ -72,10 +74,24 @@ let handleGameResponse = (e) => {
             cell_ids.push(body.api_no);
             whenMapStart(_decks, _ships, _slotitems);
             reportGetLoseItem(body);
+            cellData.push({
+                api_no: body.api_no,
+                api_event_id: body.api_event_id ? body.api_event_id : 0,
+                api_event_kind: body.api_event_kind ? body.api_event_kind : 0,
+                api_itemget: body.api_itemget ? body.api_itemget : {},
+                api_happening: body.api_happening ? body.api_happening : {},
+            });
             break;
         case '/kcsapi/api_req_map/next':
             cell_ids.push(body.api_no);
             reportGetLoseItem(body);
+            cellData.push({
+                api_no: body.api_no,
+                api_event_id: body.api_event_id ? body.api_event_id : 0,
+                api_event_kind: body.api_event_kind ? body.api_event_kind : 0,
+                api_itemget: body.api_itemget ? body.api_itemget : {},
+                api_happening: body.api_happening ? body.api_happening : {},
+            });
             break;
         case '/kcsapi/api_get_member/material':
             reportInitEquipByRemodel();
@@ -94,6 +110,18 @@ let handleGameResponse = (e) => {
         //case 'api_req_kaisou/marriage':
         //    reportShipAttr(body.api_data);
         //    break;
+        case '/kcsapi/api_get_member/mapinfo':
+            for (const map of body.api_map_info) {
+                mapLevels[map.api_id] = 0;
+                if (map.api_eventmap != null)
+                    mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
+            }
+            break;
+        case '/kcsapi/api_req_map/select_eventmap_rank':
+            const mapareaId = parseInt(postBody.api_maparea_id) * 10 + parseInt(postBody.api_map_no);
+            const rank = parseInt(postBody.api_rank);
+            mapLevels[mapareaId] = rank;
+            break;
     }
 };
 let handleGameRequest = (e) => {

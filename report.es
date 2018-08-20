@@ -428,14 +428,15 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
 };
 
 // Report fleets and mapinfos
-const reportBattleV2 = async (mapinfo_no, maparea_id, cell_ids, dock_id) => {
-    if (!cell_ids || cell_ids.length == 0) return;
+const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_id) => {
+    if (!cellData || cellData.length == 0) return;
     if (__decks.length === 0) return;
 
     let info = {
         mapAreaId: maparea_id,
         mapId: mapinfo_no,
-        cellId: cell_ids,
+        mapLevel: mapLevels[maparea_id * 10 + mapinfo_no],
+        cellData: cellData,
         decks: __decks,
         deckId: dock_id,
         teitokuId: _teitokuId,

@@ -111,7 +111,7 @@ const getTykuV2 = (deck) => {
                 maxTyku += Math.floor(tempTyku + Math.sqrt((aircraftExpTable[tempAlv + 1] - 1) / 10));
             } else if ([10, 41].includes($equip.api_type[2])) {
                 // 水偵・飛行艇
-            } else if ([9].includes($equip.api_type[2]) && landbaseStatus == 2) {
+            } else if ([9].includes($equip.api_type[2]) /** && landbaseStatus == 2 */) {
                 // 艦偵
             }
         }

@@ -10,7 +10,7 @@ Promise = require('bluebird');
 let fs = Promise.promisifyAll(require('fs-extra'));
 let request = Promise.promisifyAll(require('request'),{multiArgs: true});
 
-import { getTyku, sum, hashCode, HashTable } from './common';
+import { getTyku, getTykuV2, sum, hashCode, HashTable } from './common';
 import {join} from 'path';
 let KCWIKI_HOST = 'api.kcwiki.moe';
 let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
@@ -438,6 +438,8 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, cell_ids, dock_id) => {
         cellId: cell_ids,
         decks: __decks,
         deckId: dock_id,
+        teitokuId: _teitokuId,
+        teitokuLevel: _teitokuLv,
         version: '3.0.8'
     };
 
@@ -481,11 +483,15 @@ const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
                 let ship = _ships[ship_id];
                 let slots = [];
                 let exslot = {};
+                if (!ship)
+                    continue;
                 
                 for (let slot_id of ship.api_slot) {
                     // get slot detail data
                     if (slot_id !== -1) {
                         let slot = _slotitems[slot_id];
+                        if (!slot)
+                            continue;
                         slots.push({
                             api_slotitem_id: slot.api_slotitem_id,
                             api_level: slot.api_level,
@@ -525,6 +531,7 @@ const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
             api_id: deck.api_id,
             api_name: deck.api_name,
             api_mission: deck.api_mission,
+            tyku: getTykuV2(deck),
             ships: ships,
         });
     }

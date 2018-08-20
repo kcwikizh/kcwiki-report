@@ -16,8 +16,9 @@ let KCWIKI_HOST = 'api.kcwiki.moe';
 let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
 let HOST = KCWIKI_HOST;
 let CACHE_SWITCH = 'on';
+let HOST_V2 = 'www.2ds.tv'
 
-let drops= [], lvs = [], _path = [], __ships = {}, _remodelShips = [], _map = '',
+let drops= [], lvs = [], _path = [], __ships = {}, __decks = [], _remodelShips = [], _map = '',
     _mapId = 0, _mapAreaId = 0, combined = false, cache = new HashTable({});
 
 fs.readFile(CACHE_FILE, (err, data) => {
@@ -31,6 +32,7 @@ const reportInit = ()=> {
     lvs = [];
     _path = [];
     __ships = {};
+    __decks = [];
     _map = '';
     _mapId = 0;
     _mapAreaId = 0;
@@ -425,6 +427,37 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
     }
 };
 
+// Report fleets and mapinfos
+const reportBattleV2 = async (mapinfo_no, maparea_id, cell_ids, dock_id) => {
+    if (!cell_ids || cell_ids.length == 0) return;
+    if (__decks.length === 0) return;
+
+    let info = {
+        mapAreaId: maparea_id,
+        mapId: mapinfo_no,
+        cellId: cell_ids,
+        decks: __decks,
+        deckId: dock_id,
+        version: '3.0.8'
+    };
+
+    if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(JSON.stringify(info));
+
+    try {
+        let response = await request.postAsync(`https://${HOST_V2}/kcwiki/route`, {form: info});
+        if (window.POI_VERSION >= 'v8.0.0')
+            response = response[0];
+        let status = response.statusCode, repData = response.body;
+        if (status >= 300)
+            console.log(status,response.statusMessage);
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+            console.log(`battle.action response:  ${repData}`);
+    } catch (err) {
+        console.error(err);
+    }
+};
+
 const cacheSync = () => {
     fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -437,10 +470,72 @@ const cacheSync = () => {
     })
 };
 
-const whenMapStart = (_ships) => {
+const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
+    let decks = [];
+    for (let deck of _decks) {
+        // get deck detail info
+        let ships = [];
+        for (let ship_id of deck.api_ship) {
+            // get ship detail data
+            if (ship_id !== -1) {
+                let ship = _ships[ship_id];
+                let slots = [];
+                let exslot = {};
+                
+                for (let slot_id of ship.api_slot) {
+                    // get slot detail data
+                    if (slot_id !== -1) {
+                        let slot = _slotitems[slot_id];
+                        slots.push({
+                            api_slotitem_id: slot.api_slotitem_id,
+                            api_level: slot.api_level,
+                            api_alv: slot.api_alv ? slot.api_alv : 0,
+                        });
+                    }
+                }
+
+                // exslot
+                if (ship.api_slot_ex > 0) {
+                    let slot = _slotitems[ship.api_slot_ex];
+                    exslot = {
+                        api_slotitem_id: slot.api_slotitem_id,
+                        api_level: slot.api_level,
+                        api_alv: slot.api_alv ? slot.api_alv : 0,
+                    };
+                } else {
+                    exslot = { 
+                        api_slotitem_id: -1,
+                        api_level: 0,
+                        api_alv: 0
+                    };
+                }
+
+                ships.push({
+                    api_ship_id: ship.api_ship_id,
+                    api_lv: ship.api_lv,
+                    api_soku: ship.api_soku,
+                    slots: slots,
+                    exslot: exslot,
+                    api_cond: ship.api_cond,
+                });
+            }
+        }
+
+        decks.push({
+            api_id: deck.api_id,
+            api_name: deck.api_name,
+            api_mission: deck.api_mission,
+            ships: ships,
+        });
+    }
+    return decks;
+};
+
+const whenMapStart = (_decks, _ships, _slotitems) => {
     combined = false;
     _path = [];
     __ships = JSON.parse(JSON.stringify(_ships));
+    __decks = getDeckWhenMapStart(_decks, _ships, _slotitems);
 };
 
 const whenBattleResult = (_decks, _ships) => {
@@ -472,6 +567,7 @@ export {
     reportInitEquipByDrop,
     reportInitEquipByRemodel,
     reportBattle,
+    reportBattleV2,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

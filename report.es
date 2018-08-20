@@ -10,7 +10,7 @@ Promise = require('bluebird');
 let fs = Promise.promisifyAll(require('fs-extra'));
 let request = Promise.promisifyAll(require('request'),{multiArgs: true});
 
-import { getTyku, getTykuV2, sum, hashCode, HashTable } from './common';
+import { getTyku, getTykuV2, getSaku25, getSaku25a, getSaku33, sum, hashCode, HashTable } from './common';
 import {join} from 'path';
 let KCWIKI_HOST = 'api.kcwiki.moe';
 let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
@@ -532,6 +532,11 @@ const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
             api_name: deck.api_name,
             api_mission: deck.api_mission,
             tyku: getTykuV2(deck),
+            saku25: getSaku25(deck),
+            saku25a: getSaku25a(deck),
+            saku33x1: getSaku33(deck, 1),
+            saku33x3: getSaku33(deck, 3),
+            saku33x4: getSaku33(deck, 4),
             ships: ships,
         });
     }

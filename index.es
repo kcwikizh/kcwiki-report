@@ -1,11 +1,12 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], cellData = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
 import { reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync, reportBattle, reportBattleV2} from './report';
+import { getTykuV2 } from './common';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
@@ -20,21 +21,22 @@ let handleGameResponse = (e) => {
     let {method, path, body, postBody} = e.detail? e.detail : e;
     let {_ships, _decks, _teitokuLv, _nickName, _nickNameId} = window;
     switch (path) {
-        case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_sortie/battle':
-        case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_sortie/airbattle':
-        case '/kcsapi/api_req_combined_battle/ld_airbattle':
-        case '/kcsapi/api_req_combined_battle/midnight_battle':
-        case '/kcsapi/api_req_combined_battle/sp_midnight':
-        case '/kcsapi/api_req_battle_midnight/battle':
-        case '/kcsapi/api_req_battle_midnight/sp_midnight':
+        case '/kcsapi/api_req_sortie/ld_airbattle':
+        case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_combined_battle/battle_water':
+        case '/kcsapi/api_req_combined_battle/airbattle':
+        case '/kcsapi/api_req_combined_battle/ld_airbattle':
         case '/kcsapi/api_req_combined_battle/ec_battle':
-        case '/kcsapi/api_req_combined_battle/ec_midnight_battle':
         case '/kcsapi/api_req_combined_battle/each_battle':
         case '/kcsapi/api_req_combined_battle/each_battle_water':
+        case '/kcsapi/api_req_combined_battle/sp_midnight':
         case '/kcsapi/api_req_combined_battle/ec_night_to_day':
+        case '/kcsapi/api_req_combined_battle/midnight_battle':
+        case '/kcsapi/api_req_battle_midnight/battle':
+        case '/kcsapi/api_req_battle_midnight/sp_midnight':
+        case '/kcsapi/api_req_combined_battle/ec_midnight_battle':
             if (typeof body.api_ship_ke !== "undefined" && body.api_ship_ke !== null)
                 ship_ke = body.api_ship_ke;
             if (typeof body.api_kouku !== "undefined" && body.api_kouku !== null 
@@ -56,12 +58,27 @@ let handleGameResponse = (e) => {
             if (typeof body.api_deck_id !== "undefined" && body.api_deck_id !== null)
                 dock_id = body.api_deck_id;
             reportEnemy(body);
+            enemyData.push({
+                cellId: curCellId,
+                enemyShips1: body.api_ship_ke ? body.api_ship_ke : [],
+                enemyShips2: body.api_ship_ke_combined ? body.api_ship_ke_combined : [],
+                enemyEquip1: body.api_eSlot ? body.api_eSlot : [],
+                enemyEquip2: body.api_eSlot_combined ? body.api_eSlot_combined : [],
+                enemyParam1: body.api_eParam ? body.api_eParam : [],
+                enemyParam2: body.api_eParam_combined ? body.api_eParam_combined : [],
+                enemyFormation: body.api_formation[1],
+                seiku: seiku,
+                tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
+            });
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
-            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id);
+            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id, enemyData);
             cell_ids = [];
             cellData = [];
+            enemyData = [];
+            dropData = [];
+            curCellId = -1;
             break;
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);
@@ -74,6 +91,7 @@ let handleGameResponse = (e) => {
             cell_ids.push(body.api_no);
             whenMapStart(_decks, _ships, _slotitems);
             reportGetLoseItem(body);
+            curCellId = body.api_no;
             cellData.push({
                 api_no: body.api_no,
                 api_event_id: body.api_event_id ? body.api_event_id : 0,
@@ -85,6 +103,7 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_map/next':
             cell_ids.push(body.api_no);
             reportGetLoseItem(body);
+            curCellId = body.api_no;
             cellData.push({
                 api_no: body.api_no,
                 api_event_id: body.api_event_id ? body.api_event_id : 0,

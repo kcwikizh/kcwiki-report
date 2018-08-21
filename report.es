@@ -428,7 +428,7 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
 };
 
 // Report fleets and mapinfos
-const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_id) => {
+const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_id, enemyData) => {
     if (!cellData || cellData.length == 0) return;
     if (__decks.length === 0) return;
 
@@ -441,6 +441,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         deckId: dock_id,
         teitokuId: _teitokuId,
         teitokuLevel: _teitokuLv,
+        enemyData: enemyData,
         version: '3.0.8'
     };
 

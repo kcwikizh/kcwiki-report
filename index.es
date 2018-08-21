@@ -73,7 +73,7 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
-            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id, enemyData);
+            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id, enemyData, dropData);
             cell_ids = [];
             cellData = [];
             enemyData = [];
@@ -94,6 +94,7 @@ let handleGameResponse = (e) => {
             curCellId = body.api_no;
             cellData.push({
                 api_no: body.api_no,
+                api_next: body.api_next,
                 api_event_id: body.api_event_id ? body.api_event_id : 0,
                 api_event_kind: body.api_event_kind ? body.api_event_kind : 0,
                 api_itemget: body.api_itemget ? body.api_itemget : {},
@@ -106,6 +107,7 @@ let handleGameResponse = (e) => {
             curCellId = body.api_no;
             cellData.push({
                 api_no: body.api_no,
+                api_next: body.api_next,
                 api_event_id: body.api_event_id ? body.api_event_id : 0,
                 api_event_kind: body.api_event_kind ? body.api_event_kind : 0,
                 api_itemget: body.api_itemget ? body.api_itemget : {},
@@ -140,6 +142,18 @@ let handleGameResponse = (e) => {
             const mapareaId = parseInt(postBody.api_maparea_id) * 10 + parseInt(postBody.api_map_no);
             const rank = parseInt(postBody.api_rank);
             mapLevels[mapareaId] = rank;
+            break;
+        case '/kcsapi/api_req_sortie/battleresult':
+        case '/kcsapi/api_req_combined_battle/battleresult':
+            dropData.push({
+                cellId: curCellId,
+                shipBaseExp: body.api_get_base_exp,
+                teitokuExp: body.api_get_exp,
+                winRank: body.api_win_rank,
+                enemyName: body.api_enemy_info.api_deck_name,
+                shipId: (body.api_get_ship || {}).api_ship_id || -1,
+                itemId: (body.api_get_useitem || {}).api_useitem_id || -1,
+            });
             break;
     }
 };

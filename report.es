@@ -16,7 +16,7 @@ let KCWIKI_HOST = 'api.kcwiki.moe';
 let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
 let HOST = KCWIKI_HOST;
 let CACHE_SWITCH = 'on';
-let HOST_V2 = 'www.2ds.tv'
+let HOST_V2 = 'www.cross-bell.com:11800'
 
 let drops= [], lvs = [], _path = [], __ships = {}, __decks = [], _remodelShips = [], _map = '',
     _mapId = 0, _mapAreaId = 0, combined = false, cache = new HashTable({});
@@ -450,7 +450,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         console.log(JSON.stringify(info));
 
     try {
-        let response = await request.postAsync(`https://${HOST_V2}/kcwiki/route`, {form: info});
+        let response = await request.postAsync(`http://${HOST_V2}/kcwiki/battle`, {form: info});
         if (window.POI_VERSION >= 'v8.0.0')
             response = response[0];
         let status = response.statusCode, repData = response.body;

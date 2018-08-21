@@ -443,14 +443,17 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         teitokuLevel: _teitokuLv,
         enemyData: enemyData,
         dropData: dropData,
-        version: '3.0.8'
+        version: '3.1.0'
     };
 
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(JSON.stringify(info));
 
     try {
-        let response = await request.postAsync(`http://${HOST_V2}/kcwiki/battle`, {form: info});
+        let response = await request.postAsync(`http://${HOST_V2}/kcwiki/battle`, {
+            body: JSON.stringify(info),
+            json: true,
+            });
         if (window.POI_VERSION >= 'v8.0.0')
             response = response[0];
         let status = response.statusCode, repData = response.body;

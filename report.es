@@ -441,6 +441,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         deckId: dock_id,
         teitokuId: _teitokuId,
         teitokuLevel: _teitokuLv,
+        nickName: _nickName,
         enemyData: enemyData,
         dropData: dropData,
         version: '3.1.0'
@@ -450,7 +451,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         console.log(JSON.stringify(info));
 
     try {
-        let response = await request.postAsync(`http://${HOST_V2}/kcwiki/battle`, {
+        let response = await request.postAsync(`http://${HOST_V2}/statistic/sortie`, {
             body: JSON.stringify(info),
             json: true,
             });

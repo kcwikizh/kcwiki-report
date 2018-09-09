@@ -1,5 +1,5 @@
 let {_, SERVER_HOSTNAME} = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
 import { reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
     whenRemodel,reportGetLoseItem,
@@ -73,7 +73,7 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
-            reportBattleV2(mapinfo_no, maparear_id, mapLevels, cellData, dock_id, enemyData, dropData);
+            reportBattleV2(mapinfo_no, maparear_id, mapLevels, mapGauges, cellData, dock_id, enemyData, dropData);
             cell_ids = [];
             cellData = [];
             enemyData = [];
@@ -134,8 +134,10 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_get_member/mapinfo':
             for (const map of body.api_map_info) {
                 mapLevels[map.api_id] = 0;
-                if (map.api_eventmap != null)
+                if (map.api_eventmap != null) {
                     mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
+                    mapGauges[map.api_id] = map.api_eventmap.api_gauge_num;
+                }
             }
             break;
         case '/kcsapi/api_req_map/select_eventmap_rank':

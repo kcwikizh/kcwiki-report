@@ -428,7 +428,7 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
 };
 
 // Report fleets and mapinfos
-const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_id, enemyData, dropData) => {
+const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cellData, dock_id, enemyData, dropData) => {
     if (!cellData || cellData.length == 0) return;
     if (__decks.length === 0) return;
 
@@ -436,6 +436,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         mapAreaId: maparea_id,
         mapId: mapinfo_no,
         mapLevel: mapLevels[maparea_id * 10 + mapinfo_no],
+        mapGauge: mapGauges[maparea_id * 10 + mapinfo_no],
         cellData: cellData,
         decks: __decks,
         deckId: dock_id,
@@ -444,7 +445,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, cellData, dock_
         nickName: _nickName,
         enemyData: enemyData,
         dropData: dropData,
-        version: '3.1.0'
+        version: '3.1.1'
     };
 
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)

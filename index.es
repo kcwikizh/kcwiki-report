@@ -73,7 +73,7 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
-            reportBattleV2(mapinfo_no, maparear_id, mapLevels, mapGauges, cellData, dock_id, enemyData, dropData);
+            reportBattleV2(mapinfo_no, maparear_id, mapLevels, mapGauges, cellData, dock_id, enemyData, dropData, body.api_combined_flag);
             cell_ids = [];
             cellData = [];
             enemyData = [];

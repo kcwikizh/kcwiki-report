@@ -5,7 +5,7 @@ import { reportInit, reportEnemy,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
-    reoprtTyku, cacheSync, reportBattle, reportBattleV2} from './report';
+    reoprtTyku, cacheSync, reportBattle, reportBattleV2, reportFrindly} from './report';
 import { getTykuV2 } from './common';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
@@ -70,6 +70,8 @@ let handleGameResponse = (e) => {
                 seiku: seiku,
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
+            if (typeof body.api_friendly_info !== "undefined" && body.api_friendly_info !== null)
+                reportFrindly(body.api_friendly_info)
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);

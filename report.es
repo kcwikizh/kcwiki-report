@@ -17,6 +17,7 @@ let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
 let HOST = KCWIKI_HOST;
 let CACHE_SWITCH = 'on';
 let HOST_V2 = 'www.cross-bell.com:11800'
+let HOST_V3 = 'report2.kcwiki.org:17027'
 
 let drops= [], lvs = [], _path = [], __ships = {}, __decks = [], _remodelShips = [], _map = '',
     _mapId = 0, _mapAreaId = 0, combined = false, cache = new HashTable({});
@@ -470,6 +471,16 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
     }
 };
 
+const reportFrindly = async (body) => {
+  if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, {form: body});
+
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(`friendly.action response: ${repData}`);
+        cache.put(body);
+    }
+}
+
 const cacheSync = () => {
     fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -590,6 +601,7 @@ export {
     reportInitEquipByRemodel,
     reportBattle,
     reportBattleV2,
+    reportFrindly,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

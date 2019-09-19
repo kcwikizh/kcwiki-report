@@ -5,7 +5,8 @@ import { reportInit, reportEnemy,
     whenRemodel,reportGetLoseItem,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
-    reoprtTyku, cacheSync, reportBattle, reportBattleV2, reportFrindly} from './report';
+    reoprtTyku, cacheSync, reportBattle, reportBattleV2,
+    reportFrindly, reportAirBaseAttack} from './report';
 import { getTykuV2 } from './common';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
@@ -115,6 +116,12 @@ let handleGameResponse = (e) => {
                 api_itemget: body.api_itemget ? body.api_itemget : {},
                 api_happening: body.api_happening ? body.api_happening : {},
             });
+            if (typeof body.api_destruction_battle !== "undefined" && body.api_destruction_battle !== null
+                && typeof body.api_destruction_battle.api_air_base_attack !== "undefined" && body.api_destruction_battle.api_air_base_attack !== null)
+            {
+                body.api_destruction_battle.api_air_base_attack = JSON.stringify(body.api_destruction_battle.api_air_base_attack)
+                reportAirBaseAttack(body.api_destruction_battle)
+            }
             break;
         case '/kcsapi/api_get_member/material':
             reportInitEquipByRemodel();

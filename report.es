@@ -481,6 +481,16 @@ const reportFrindly = async (body) => {
     }
 }
 
+const reportAirBaseAttack = async (body) => {
+  if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, {form: body});
+
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(`friendly.action response: ${repData}`);
+        cache.put(body);
+    }
+}
+
 const cacheSync = () => {
     fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -602,6 +612,7 @@ export {
     reportBattle,
     reportBattleV2,
     reportFrindly,
+    reportAirBaseAttack,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

@@ -71,8 +71,16 @@ let handleGameResponse = (e) => {
                 seiku: seiku,
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
-            if (typeof body.api_friendly_info !== "undefined" && body.api_friendly_info !== null)
-                reportFrindly(body.api_friendly_info)
+            if (typeof body.api_friendly_info !== "undefined" && body.api_friendly_info !== null) {
+                const data = {
+                    ...body.api_friendly_info,
+                    maparea_id: maparear_id,
+                    mapinfo_no: mapinfo_no,
+                    curCellId: curCellId,
+                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)]
+                }
+                reportFrindly(data)
+            }
             break;
         case '/kcsapi/api_port/port':
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
@@ -120,7 +128,14 @@ let handleGameResponse = (e) => {
                 && typeof body.api_destruction_battle.api_air_base_attack !== "undefined" && body.api_destruction_battle.api_air_base_attack !== null)
             {
                 body.api_destruction_battle.api_air_base_attack = JSON.stringify(body.api_destruction_battle.api_air_base_attack)
-                reportAirBaseAttack(body.api_destruction_battle)
+                const data = {
+                    ...body.api_destruction_battle,
+                    maparea_id: maparear_id,
+                    mapinfo_no: mapinfo_no,
+                    curCellId: curCellId,
+                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)]
+                }
+                reportAirBaseAttack(data)
             }
             break;
         case '/kcsapi/api_get_member/material':

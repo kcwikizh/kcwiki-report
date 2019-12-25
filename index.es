@@ -6,7 +6,7 @@ import { reportInit, reportEnemy,
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync, reportBattle, reportBattleV2,
-    reportFrindly, reportAirBaseAttack} from './report';
+    reportFrindly, reportAirBaseAttack, reportNextWay} from './report';
 import { getTykuV2 } from './common';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
@@ -136,6 +136,31 @@ let handleGameResponse = (e) => {
                     mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)]
                 }
                 reportAirBaseAttack(data)
+            }
+            {
+                let deck1 = _decks[0].api_ship.map(item => _ships[item]);
+                let deck2 = _decks[1].api_ship.map(item => _ships[item]);
+                let slot1 = deck1.map(item => {
+                    if(item) return item.api_slot.map(item => {
+                        return item !== -1 ? _slotitems[item] : -1
+                    })
+                })
+                let slot2 = deck2.map(item => {
+                    if(item) return item.api_slot.map(item => {
+                        return item !== -1 ? _slotitems[item] : -1
+                    })
+                })
+                const data = {
+                    deck1,
+                    deck2,
+                    slot1,
+                    slot2,
+                    cell_ids,
+                    curCellId,
+                    mapLevels,
+                    nextInfo: body
+                }
+                reportNextWay(data)
             }
             break;
         case '/kcsapi/api_get_member/material':

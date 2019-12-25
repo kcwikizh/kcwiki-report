@@ -486,7 +486,17 @@ const reportAirBaseAttack = async (body) => {
         let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, {form: body});
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-        console.log(`friendly.action response: ${repData}`);
+        console.log(`airbaseattack.action response: ${repData}`);
+        cache.put(body);
+    }
+}
+
+const reportNextWay = async (body) => {
+  if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way`, {form: body});
+
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+        console.log(`nextway.action response: ${repData}`);
         cache.put(body);
     }
 }
@@ -613,6 +623,7 @@ export {
     reportBattleV2,
     reportFrindly,
     reportAirBaseAttack,
+    reportNextWay,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

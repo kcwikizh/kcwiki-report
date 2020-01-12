@@ -2,16 +2,16 @@ let { _, SERVER_HOSTNAME, APPDATA_PATH } = window;
 if (_ === "undefined") {
     try {
         _ = require('lodash');
-    } catch(err) {
+    } catch (err) {
         _ = require('underscore');
     }
 }
 Promise = require('bluebird');
 let fs = Promise.promisifyAll(require('fs-extra'));
-let request = Promise.promisifyAll(require('request'),{multiArgs: true});
+let request = Promise.promisifyAll(require('request'), { multiArgs: true });
 
 import { getTyku, getTykuV2, getSaku25, getSaku25a, getSaku33, sum, hashCode, HashTable } from './common';
-import {join} from 'path';
+import { join } from 'path';
 let KCWIKI_HOST = 'api.kcwiki.moe';
 let CACHE_FILE = join(APPDATA_PATH, 'kcwiki-report', 'cache.json');
 let HOST = KCWIKI_HOST;
@@ -19,7 +19,7 @@ let CACHE_SWITCH = 'on';
 let HOST_V2 = 'www.cross-bell.com:11800'
 let HOST_V3 = 'report2.kcwiki.org:17027'
 
-let drops= [], lvs = [], _path = [], __ships = {}, __decks = [], _remodelShips = [], _map = '',
+let drops = [], lvs = [], _path = [], __ships = {}, __decks = [], _remodelShips = [], _map = '',
     _mapId = 0, _mapAreaId = 0, combined = false, cache = new HashTable({});
 
 fs.readFile(CACHE_FILE, (err, data) => {
@@ -28,7 +28,7 @@ fs.readFile(CACHE_FILE, (err, data) => {
     if (typeof err !== "undefined" && err !== null && err.code && err.code != 'ENOENT') console.error(err.code);
 });
 
-const reportInit = ()=> {
+const reportInit = () => {
     drops = [];
     lvs = [];
     _path = [];
@@ -49,7 +49,7 @@ const reportGetLoseItem = async (body) => {
     // Report getitem data
     if (typeof body.api_itemget !== "undefined" && body.api_itemget !== null) {
         // Item ID: 1 油 2 弹
-        let eventId = [],count = [];
+        let eventId = [], count = [];
         for (let item of body.api_itemget) {
             eventId.push(+item.api_id);
             count.push(+item.api_getcount);
@@ -65,19 +65,19 @@ const reportGetLoseItem = async (body) => {
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(JSON.stringify(info));
         if (cache.miss(info)) {
-            let response = await request.postAsync(`http://${HOST}/mapEvent`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/mapEvent`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`getitem.action response: ${repData}`);
             cache.put(info);
         }
     }
     //Report dropitem data
-    if (typeof body.api_happening !== "undefined" && body.api_happening !==null && body.api_happening.api_type == 1) {
+    if (typeof body.api_happening !== "undefined" && body.api_happening !== null && body.api_happening.api_type == 1) {
         // Bullet - Type:1 IconId:2
         // Fuel - Type:1 IconId:1
         let info = {
@@ -91,17 +91,17 @@ const reportGetLoseItem = async (body) => {
         };
         if (process.env.DEBUG) console.log(JSON.stringify(info));
         if (cache.miss(info)) {
-            let response = await request.postAsync(`http://${HOST}/mapEvent`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/mapEvent`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`dropitem.action response: ${repData}`);
             cache.put(info);
-    }
         }
+    }
     return;
 };
 
@@ -119,12 +119,12 @@ const reportEnemy = async (body) => {
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/enemy`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/enemy`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`enemy.action response: ${repData}`);
             cache.put(info);
@@ -156,8 +156,8 @@ const reportShipAttrByLevelUp = async (path) => {
             let ship_slots = ship.api_slot;
             let luck = ship.api_luck[0]; // 運
             let kaihi = ship.api_kaihi[0]; // 回避
-            let sakuteki = ship.api_sakuteki[0] - sum(ship_slots.filter(ship_slot=>ship_slot != -1).map(ship_slot => _slotitems[ship_slot].api_saku));// 索敵
-            let taisen = ship.api_taisen[0] - sum(ship_slots.filter(ship_slot => ship_slot != -1).map(ship_slot=>_slotitems[ship_slot].api_tais));// 対潜
+            let sakuteki = ship.api_sakuteki[0] - sum(ship_slots.filter(ship_slot => ship_slot != -1).map(ship_slot => _slotitems[ship_slot].api_saku));// 索敵
+            let taisen = ship.api_taisen[0] - sum(ship_slots.filter(ship_slot => ship_slot != -1).map(ship_slot => _slotitems[ship_slot].api_tais));// 対潜
             let info = {
                 sortno: +ship.api_sortno,
                 luck: +luck,
@@ -170,12 +170,12 @@ const reportShipAttrByLevelUp = async (path) => {
                 console.log(JSON.stringify(info));
             if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                 try {
-                    let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+                    let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
                     if (window.POI_VERSION >= 'v8.0.0')
-                      response = response[0];
+                        response = response[0];
                     let status = response.statusCode, repData = response.body;
                     if (status >= 300)
-                        console.log(status,response.statusMessage);
+                        console.log(status, response.statusMessage);
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log(`attr.action response: ${repData}`);
                     cache.put(info);
@@ -188,12 +188,12 @@ const reportShipAttrByLevelUp = async (path) => {
     }
 };
 const reportShipAttr = async (ship) => {
-    let {_slotitems} = window;
+    let { _slotitems } = window;
     let slots = ship.api_slot;
     let luck = ship.api_lucky[0]; // 運
     let kaihi = ship.api_kaihi[0]; // 回避
-    let sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
-    let taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+    let sakuteki = ship.api_sakuteki[0] - sum(slots.filter(slot => slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
+    let taisen = ship.api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot => _slotitems[slot].api_tais));// 対潜
     let info = {
         sortno: +ship.api_sortno,
         luck: +luck,
@@ -206,12 +206,12 @@ const reportShipAttr = async (ship) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`attr.action response: ${repData}`);
             cache.put(info);
@@ -223,20 +223,20 @@ const reportShipAttr = async (ship) => {
 
 // Report initial equip data
 const reportInitEquipByDrop = async (_ships) => {
-    let {_slotitems} = window;
+    let { _slotitems } = window;
     if (_.keys(__ships).length != 0) {
         let _newShips = {};
         let _keys = _.keys(_ships);
         let __keys = _.keys(__ships);
-        let _newKeys = _.difference(_keys,__keys);
+        let _newKeys = _.difference(_keys, __keys);
         if (_newKeys.length > 0) {
             for (let key of _newKeys) {
                 _newShips[_ships[key].api_sortno] = _ships[key].api_slot;
                 let slots = _ships[key].api_slot;
                 let luck = _ships[key].api_lucky[0]; // 運
                 let kaihi = _ships[key].api_kaihi[0]; // 回避
-                let sakuteki = _ships[key].api_sakuteki[0] - sum(slots.filter(slot=>slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
-                let taisen = _ships[key].api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot=>_slotitems[slot].api_tais));// 対潜
+                let sakuteki = _ships[key].api_sakuteki[0] - sum(slots.filter(slot => slot != -1).map(slot => _slotitems[slot].api_saku));// 索敵
+                let taisen = _ships[key].api_taisen[0] - sum(slots.filter(slot => slot != -1).map(slot => _slotitems[slot].api_tais));// 対潜
                 let info = {
                     sortno: +_ships[key].api_sortno,
                     luck: +luck,
@@ -249,12 +249,12 @@ const reportInitEquipByDrop = async (_ships) => {
                     console.log(JSON.stringify(info));
                 if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                     try {
-                        let response = await request.postAsync(`http://${HOST}/shipAttr`, {form: info});
+                        let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
                         if (window.POI_VERSION >= 'v8.0.0')
-                          response = response[0];
+                            response = response[0];
                         let status = response.statusCode, repData = response.body;
                         if (status >= 300)
-                            console.log(status,response.statusMessage);
+                            console.log(status, response.statusMessage);
                         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) {
                             console.log(response)
                             console.log(`attr.action response: ${repData}`);
@@ -267,7 +267,7 @@ const reportInitEquipByDrop = async (_ships) => {
             }
             for (let shipno in _newShips) {
                 let slots = _newShips[shipno];
-                _newShips[shipno] = slots.filter(slot=>slot!=-1).map(slot=> _slotitems[slot].api_sortno);
+                _newShips[shipno] = slots.filter(slot => slot != -1).map(slot => _slotitems[slot].api_sortno);
             }
             let info = {
                 ships: _newShips
@@ -277,12 +277,12 @@ const reportInitEquipByDrop = async (_ships) => {
                 console.log(JSON.stringify(info));
             if (CACHE_SWITCH == 'off' || cache.miss(_newShips)) {
                 try {
-                    let response = await request.postAsync(`http://${HOST}/initEquip`, {form: info});
+                    let response = await request.postAsync(`http://${HOST}/initEquip`, { form: info });
                     if (window.POI_VERSION >= 'v8.0.0')
-                      response = response[0];
+                        response = response[0];
                     let status = response.statusCode, repData = response.body;
                     if (status >= 300)
-                        console.log(status,response.statusMessage);
+                        console.log(status, response.statusMessage);
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log(`initEquip.action response: ${repData}`);
                     cache.put(_newShips);
@@ -298,7 +298,7 @@ const reportInitEquipByDrop = async (_ships) => {
 // Report initial equip data
 const reportInitEquipByBuild = async (body, _ships) => {
     let ship = _ships[body.api_ship.api_id];
-    let slots = ship.api_slot.filter(slot => slot!=-1).map(slot=>_slotitems[slot].api_sortno);
+    let slots = ship.api_slot.filter(slot => slot != -1).map(slot => _slotitems[slot].api_sortno);
     let data = {};
     data[ship.api_sortno] = slots;
     let info = {
@@ -308,12 +308,12 @@ const reportInitEquipByBuild = async (body, _ships) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/initEquip`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/initEquip`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`initEquip.action response: ${repData}`);
             cache.put(data);
@@ -330,16 +330,16 @@ const reportInitEquipByRemodel = async () => {
     for (let apiId in _remodelShips) {
         apiId = parseInt(apiId);
         let ship = _ships[apiId];
-        data[ship] = ship.api_slot.filter(slot=> slot != -1).map(slot=>_slotitems[slot].api_sortno);
+        data[ship] = ship.api_slot.filter(slot => slot != -1).map(slot => _slotitems[slot].api_sortno);
     }
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/initEquip`, {form: {ships: data}});
+            let response = await request.postAsync(`http://${HOST}/initEquip`, { form: { ships: data } });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`initEquip.action response:  ${repData}`);
             cache.put(data);
@@ -351,14 +351,14 @@ const reportInitEquipByRemodel = async () => {
 };
 
 // Report tyku data
-const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
-    let {rank, map, mapCell, dropShipId, deckShipId} = detail;
-    let {_teitokuLv, _nickName, _nickNameId, _decks} = window;
+const reoprtTyku = async (eSlot, eKouku, detail, seiku, dock_id, ship_id) => {
+    let { rank, map, mapCell, dropShipId, deckShipId } = detail;
+    let { _teitokuLv, _nickName, _nickNameId, _decks } = window;
     if (deckShipId.length > 6) combined = true;
-    let {maxTyku,minTyku} = getTyku(_decks[dock_id-1]);
+    let { maxTyku, minTyku } = getTyku(_decks[dock_id - 1]);
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
         console.log(`Tyku value: ${minTyku}, ${maxTyku}`);
-    let {api_no, api_maparea_id} = $maps[map];
+    let { api_no, api_maparea_id } = $maps[map];
     //-1=数据缺失, 0=制空均衡, 1=制空権確保, 2=航空優勢, 3=航空劣勢, 4=制空権喪失
     let info = {
         mapAreaId: +api_maparea_id,
@@ -375,13 +375,13 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/tyku`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/tyku`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
-            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) 
+                console.log(status, response.statusMessage);
+            if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`Tyku api response: ${repData}`);
             cache.put(info);
         } catch (err) {
@@ -392,7 +392,7 @@ const reoprtTyku = async (eSlot,eKouku,detail,seiku,dock_id,ship_id) => {
 };
 
 // Report fleets and mapinfos
-const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
+const reportBattle = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _ships) => {
     if (mapinfo_no == 1 && maparea_id == 1) return;
     let ships = [];
     for (let ship_id of _decks[dock_id].api_ship) {
@@ -413,12 +413,12 @@ const reportBattle= async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _s
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/expedition`, {form: info});
+            let response = await request.postAsync(`http://${HOST}/expedition`, { form: info });
             if (window.POI_VERSION >= 'v8.0.0')
                 response = response[0];
             let status = response.statusCode, repData = response.body;
             if (status >= 300)
-                console.log(status,response.statusMessage);
+                console.log(status, response.statusMessage);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`battle.action response:  ${repData}`);
             cache.put(info);
@@ -458,12 +458,12 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
         let response = await request.postAsync(`http://${HOST_V2}/statistic/sortie`, {
             body: JSON.stringify(info),
             json: true,
-            });
+        });
         if (window.POI_VERSION >= 'v8.0.0')
             response = response[0];
         let status = response.statusCode, repData = response.body;
         if (status >= 300)
-            console.log(status,response.statusMessage);
+            console.log(status, response.statusMessage);
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response:  ${repData}`);
     } catch (err) {
@@ -472,31 +472,31 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
 };
 
 const reportFrindly = async (body) => {
-  if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, {form: body});
+    if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, { form: body });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-        console.log(`friendly.action response: ${repData}`);
+            console.log(`friendly.action response: ${repData}`);
         cache.put(body);
     }
 }
 
 const reportAirBaseAttack = async (body) => {
-  if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, {form: body});
+    if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, { form: body });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-        console.log(`airbaseattack.action response: ${repData}`);
+            console.log(`airbaseattack.action response: ${repData}`);
         cache.put(body);
     }
 }
 
-const reportNextWay = async (body) => {
-  if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way`, {form: body});
+const reportNextWayV2 = async (body) => {
+    if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way_v2`, { form: body });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
-        console.log(`nextway.action response: ${repData}`);
+            console.log(`nextway.action response: ${repData}`);
         cache.put(body);
     }
 }
@@ -526,7 +526,7 @@ const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
                 let exslot = {};
                 if (!ship)
                     continue;
-                
+
                 for (let slot_id of ship.api_slot) {
                     // get slot detail data
                     if (slot_id !== -1) {
@@ -550,7 +550,7 @@ const getDeckWhenMapStart = (_decks, _ships, _slotitems) => {
                         api_alv: slot.api_alv ? slot.api_alv : 0,
                     };
                 } else {
-                    exslot = { 
+                    exslot = {
                         api_slotitem_id: -1,
                         api_level: 0,
                         api_alv: 0
@@ -623,7 +623,7 @@ export {
     reportBattleV2,
     reportFrindly,
     reportAirBaseAttack,
-    reportNextWay,
+    reportNextWayV2,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

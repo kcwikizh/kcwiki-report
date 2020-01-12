@@ -17,7 +17,7 @@ const aircraftLevelBonus = {
 const getTyku = (deck) => {
     let minTyku = 0;
     let maxTyku = 0;
-    let {$ships, $slotitems, _ships, _slotitems} = window;
+    let { $ships, $slotitems, _ships, _slotitems } = window;
     for (let shipId of deck.api_ship) {
         if (shipId == -1)
             continue;
@@ -58,7 +58,7 @@ const getTyku = (deck) => {
 };
 
 const getTykuV2 = (deck) => {
-    let {$slotitems, _ships, _slotitems} = window;
+    let { $slotitems, _ships, _slotitems } = window;
     let minTyku = 0;
     let maxTyku = 0;
     let basicTyku = 0;
@@ -67,7 +67,7 @@ const getTykuV2 = (deck) => {
         if (shipId === -1)
             continue;
         let ship = _ships[shipId];
-        if (!ship) 
+        if (!ship)
             continue;
         for (let i = 0; i < ship.api_slot.length; i++) {
             let slotId = ship.api_slot[i];
@@ -126,7 +126,7 @@ const getTykuV2 = (deck) => {
 // Saku (2-5 旧式)
 // 偵察機索敵値×2 ＋ 電探索敵値 ＋ √(艦隊の装備込み索敵値合計 - 偵察機索敵値 - 電探索敵値)
 const getSaku25 = (deck) => {
-    let {$slotitems, _ships, _slotitems} = window;
+    let { $slotitems, _ships, _slotitems } = window;
     let reconSaku = 0;
     let shipSaku = 0;
     let radarSaku = 0;
@@ -135,7 +135,7 @@ const getSaku25 = (deck) => {
         if (shipId === -1)
             continue;
         let ship = _ships[shipId];
-        if (!ship) 
+        if (!ship)
             continue;
 
         shipSaku += ship.api_sakuteki[0];
@@ -184,7 +184,7 @@ const getSaku25 = (deck) => {
 //            + 水上爆撃機 × (1.78) + 小型電探 × (1.00) + 大型電探 × (0.99) + 探照灯 × (0.91)
 //            + √(各艦毎の素索敵) × (1.69) + (司令部レベルを5の倍数に切り上げ) × (-0.61)
 const getSaku25a = (deck) => {
-    let {$slotitems, _ships, _slotitems, _teitokuLv} = window;
+    let { $slotitems, _ships, _slotitems, _teitokuLv } = window;
     let totalSaku = 0;
     let shipSaku = 0;
     let equipSaku = 0;
@@ -193,7 +193,7 @@ const getSaku25a = (deck) => {
         if (shipId === -1)
             continue;
         let ship = _ships[shipId];
-        if (!ship) 
+        if (!ship)
             continue;
 
         let shipPureSaku = ship.api_sakuteki[0];
@@ -276,7 +276,7 @@ const getSaku25a = (deck) => {
 //     H(レベル)
 //     M(空き数)
 const getSaku33 = (deck, mapModifier) => {
-    let {$slotitems, _ships, _slotitems, _teitokuLv} = window;
+    let { $slotitems, _ships, _slotitems, _teitokuLv } = window;
     let totalSaku = 0;
     let shipSaku = 0;
     let equipSaku = 0;
@@ -286,7 +286,7 @@ const getSaku33 = (deck, mapModifier) => {
         if (shipId === -1)
             continue;
         let ship = _ships[shipId];
-        if (!ship) 
+        if (!ship)
             continue;
 
         emptySlot -= 1;
@@ -361,11 +361,11 @@ class HashTable {
     }
 }
 
-const sum = arr => arr.reduce((total,item) => total + item, 0);
+const sum = arr => arr.reduce((total, item) => total + item, 0);
 
-const hashCode = val => val.split('').reduce((h,ch) => {
+const hashCode = val => val.split('').reduce((h, ch) => {
     if (typeof h == "string") h = h.charCodeAt(0);
-    h = ((h<<5)-h)+ch.charCodeAt(0);
+    h = ((h << 5) - h) + ch.charCodeAt(0);
     h |= 0;
     return h;
 }, 0);

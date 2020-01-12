@@ -1,6 +1,6 @@
 let { _, SERVER_HOSTNAME } = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
-let combined_type = 0, preEscape = [], escapeList = [];
+let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = [];
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -117,6 +117,8 @@ let handleGameResponse = (e) => {
                 api_itemget: body.api_itemget ? body.api_itemget : {},
                 api_happening: body.api_happening ? body.api_happening : {},
             });
+
+            api_cell_data = body.api_cell_data.map(item => item.api_no)
             break;
         case '/kcsapi/api_req_map/next':
             cell_ids.push(body.api_no);
@@ -184,7 +186,8 @@ let handleGameResponse = (e) => {
                             sakuTwo33x2: getSaku33(_decks[1], 2).total,
                             sakuTwo33x3: getSaku33(_decks[1], 3).total,
                             sakuTwo33x4: getSaku33(_decks[1], 4).total
-                        }
+                        },
+                        api_cell_data: api_cell_data
                     }
                     reportNextWayV2(data)
                 }, 500)

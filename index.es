@@ -145,8 +145,16 @@ let handleGameResponse = (e) => {
                 reportAirBaseAttack(data)
             }
             {
-                let deck1 = _decks[0].api_ship.map(item => _ships[item]);
-                let deck2 = _decks[1].api_ship.map(item => _ships[item]);
+                let deck1 = _decks[0].api_ship.map(item => {
+                    let _item = _ships[item];
+                    _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1
+                    return _item
+                });
+                let deck2 = _decks[1].api_ship.map(item => {
+                    let _item = _ships[item];
+                    _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1
+                    return _item
+                });
                 let slot1 = deck1.map(item => {
                     if (item) return item.api_slot.map(item => {
                         return item !== -1 ? _slotitems[item] : -1

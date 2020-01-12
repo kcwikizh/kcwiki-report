@@ -159,7 +159,7 @@ let handleGameResponse = (e) => {
                 })
 
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
-                setTimout(() => {
+                setTimeout(() => {
                     const data = {
                         deck1,
                         deck2,

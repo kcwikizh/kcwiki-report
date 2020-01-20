@@ -1,6 +1,6 @@
 let { _, SERVER_HOSTNAME } = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
-let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = [];
+let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -101,6 +101,7 @@ let handleGameResponse = (e) => {
             cacheSync();
             break;
         case '/kcsapi/api_req_map/start':
+            dock_id = postBody.api_deck_id;
             preEscape = [];
             escapeList = [];
             mapinfo_no = body.api_mapinfo_no;
@@ -118,7 +119,7 @@ let handleGameResponse = (e) => {
                 api_happening: body.api_happening ? body.api_happening : {},
             });
 
-            api_cell_data = body.api_cell_data.map(item => item.api_no)
+            api_cell_data = body.api_cell_data.length
             break;
         case '/kcsapi/api_req_map/next':
             cell_ids.push(body.api_no);
@@ -145,26 +146,27 @@ let handleGameResponse = (e) => {
                 reportAirBaseAttack(data)
             }
             {
-                let deck1 = _decks[0].api_ship.map(item => {
+                let deck1_index = Number(dock_id) - 1;
+                let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
-                    _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1
+                    _item.api_slotitem_ex = _item && _item.api_slot_ex !== -1 ? _slotitems[item] : -1
                     return _item
                 });
-                let deck2 = _decks[1].api_ship.map(item => {
+                let deck2 = combined_type != 0 ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
-                    _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1
+                    _item.api_slotitem_ex = _item && _item.api_slot_ex !== -1 ? _slotitems[item] : -1
                     return _item
-                });
+                }) : [];
                 let slot1 = deck1.map(item => {
                     if (item) return item.api_slot.map(item => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
                 })
-                let slot2 = deck2.map(item => {
+                let slot2 = combined_type != 0 ? deck2.map(item => {
                     if (item) return item.api_slot.map(item => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
-                })
+                }) : []
 
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
                 setTimeout(() => {
@@ -182,18 +184,18 @@ let handleGameResponse = (e) => {
                         teitokuLv: _teitokuLv,
                         cell_ids: cell_ids,
                         saku: {
-                            sakuOne25: getSaku25(_decks[0]).total,
-                            sakuOne25a: getSaku25a(_decks[0]).total,
-                            sakuOne33x1: getSaku33(_decks[0], 1).total,
-                            sakuOne33x2: getSaku33(_decks[0], 2).total,
-                            sakuOne33x3: getSaku33(_decks[0], 3).total,
-                            sakuOne33x4: getSaku33(_decks[0], 4).total,
-                            sakuTwo25: getSaku25(_decks[1]).total,
-                            sakuTwo25a: getSaku25a(_decks[1]).total,
-                            sakuTwo33x1: getSaku33(_decks[1], 1).total,
-                            sakuTwo33x2: getSaku33(_decks[1], 2).total,
-                            sakuTwo33x3: getSaku33(_decks[1], 3).total,
-                            sakuTwo33x4: getSaku33(_decks[1], 4).total
+                            sakuOne25: getSaku25(_decks[deck1_index]).total,
+                            sakuOne25a: getSaku25a(_decks[deck1_index]).total,
+                            sakuOne33x1: getSaku33(_decks[deck1_index], 1).total,
+                            sakuOne33x2: getSaku33(_decks[deck1_index], 2).total,
+                            sakuOne33x3: getSaku33(_decks[deck1_index], 3).total,
+                            sakuOne33x4: getSaku33(_decks[deck1_index], 4).total,
+                            sakuTwo25: combined_type != 0 ? getSaku25(_decks[1]).total : 0,
+                            sakuTwo25a: combined_type != 0 ? getSaku25a(_decks[1]).total : 0,
+                            sakuTwo33x1: combined_type != 0 ? getSaku33(_decks[1], 1).total : 0,
+                            sakuTwo33x2: combined_type != 0 ? getSaku33(_decks[1], 2).total : 0,
+                            sakuTwo33x3: combined_type != 0 ? getSaku33(_decks[1], 3).total : 0,
+                            sakuTwo33x4: combined_type != 0 ? getSaku33(_decks[1], 4).total : 0
                         },
                         api_cell_data: api_cell_data
                     }

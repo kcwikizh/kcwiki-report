@@ -120,6 +120,65 @@ let handleGameResponse = (e) => {
             });
 
             api_cell_data = body.api_cell_data.length
+
+            {
+                let deck1_index = Number(dock_id) - 1;
+                let deck1 = _decks[deck1_index].api_ship.map(item => {
+                    let _item = _ships[item];
+                    if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
+                    return _item
+                });
+                let deck2 = combined_type != 0 ? _decks[1].api_ship.map(item => {
+                    let _item = _ships[item];
+                    if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
+                    return _item
+                }) : [];
+                let slot1 = deck1.map(item => {
+                    if (item) return item.api_slot.map(item => {
+                        return item !== -1 ? _slotitems[item] : -1
+                    })
+                })
+                let slot2 = combined_type != 0 ? deck2.map(item => {
+                    if (item) return item.api_slot.map(item => {
+                        return item !== -1 ? _slotitems[item] : -1
+                    })
+                }) : []
+
+                // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
+                setTimeout(() => {
+                    const data = {
+                        deck1,
+                        deck2,
+                        slot1,
+                        slot2,
+                        cell_ids,
+                        curCellId,
+                        mapLevels,
+                        nextInfo: body,
+                        escapeList: escapeList,
+                        combined_type: combined_type,
+                        teitokuLv: _teitokuLv,
+                        cell_ids: cell_ids,
+                        saku: {
+                            sakuOne25: getSaku25(_decks[deck1_index]).total,
+                            sakuOne25a: getSaku25a(_decks[deck1_index]).total,
+                            sakuOne33x1: getSaku33(_decks[deck1_index], 1).total,
+                            sakuOne33x2: getSaku33(_decks[deck1_index], 2).total,
+                            sakuOne33x3: getSaku33(_decks[deck1_index], 3).total,
+                            sakuOne33x4: getSaku33(_decks[deck1_index], 4).total,
+                            sakuTwo25: combined_type != 0 ? getSaku25(_decks[1]).total : 0,
+                            sakuTwo25a: combined_type != 0 ? getSaku25a(_decks[1]).total : 0,
+                            sakuTwo33x1: combined_type != 0 ? getSaku33(_decks[1], 1).total : 0,
+                            sakuTwo33x2: combined_type != 0 ? getSaku33(_decks[1], 2).total : 0,
+                            sakuTwo33x3: combined_type != 0 ? getSaku33(_decks[1], 3).total : 0,
+                            sakuTwo33x4: combined_type != 0 ? getSaku33(_decks[1], 4).total : 0
+                        },
+                        api_cell_data: api_cell_data
+                    }
+                    reportNextWayV2(data)
+                }, 500)
+
+            }
             break;
         case '/kcsapi/api_req_map/next':
             cell_ids.push(body.api_no);

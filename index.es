@@ -128,7 +128,8 @@ let handleGameResponse = (e) => {
                     if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
                     return _item
                 });
-                let deck2 = combined_type != 0 ? _decks[1].api_ship.map(item => {
+                let hasTwo = combined_type != 0 && deck1_index == 0;
+                let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
                     return _item
@@ -138,15 +139,27 @@ let handleGameResponse = (e) => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
                 })
-                let slot2 = combined_type != 0 ? deck2.map(item => {
+                let slot2 = hasTwo ? deck2.map(item => {
                     if (item) return item.api_slot.map(item => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
                 }) : []
 
+                // 去掉撤回的船计算索敌
+                let s1 = {api_ship: JSON.parse(JSON.stringify(_decks[deck1_index].api_ship))}
+                let s2 = {api_ship: JSON.parse(JSON.stringify(_decks[1].api_ship))}
+                for(let i of escapeList) {
+                    if(i > 6) {
+                        s2.api_ship[i - 7] = -1;
+                    }else {
+                        s1.api_ship[i - 1] = -1;
+                    }
+                }
+
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
                 setTimeout(() => {
                     const data = {
+                        deck1_index,
                         deck1,
                         deck2,
                         slot1,
@@ -156,22 +169,22 @@ let handleGameResponse = (e) => {
                         mapLevels,
                         nextInfo: body,
                         escapeList: escapeList,
-                        combined_type: combined_type,
+                        combined_type: hasTwo ? combined_type : 0,
                         teitokuLv: _teitokuLv,
                         cell_ids: cell_ids,
                         saku: {
-                            sakuOne25: getSaku25(_decks[deck1_index]).total,
-                            sakuOne25a: getSaku25a(_decks[deck1_index]).total,
-                            sakuOne33x1: getSaku33(_decks[deck1_index], 1).total,
-                            sakuOne33x2: getSaku33(_decks[deck1_index], 2).total,
-                            sakuOne33x3: getSaku33(_decks[deck1_index], 3).total,
-                            sakuOne33x4: getSaku33(_decks[deck1_index], 4).total,
-                            sakuTwo25: combined_type != 0 ? getSaku25(_decks[1]).total : 0,
-                            sakuTwo25a: combined_type != 0 ? getSaku25a(_decks[1]).total : 0,
-                            sakuTwo33x1: combined_type != 0 ? getSaku33(_decks[1], 1).total : 0,
-                            sakuTwo33x2: combined_type != 0 ? getSaku33(_decks[1], 2).total : 0,
-                            sakuTwo33x3: combined_type != 0 ? getSaku33(_decks[1], 3).total : 0,
-                            sakuTwo33x4: combined_type != 0 ? getSaku33(_decks[1], 4).total : 0
+                            sakuOne25: getSaku25(s1).total,
+                            sakuOne25a: getSaku25a(s1).total,
+                            sakuOne33x1: getSaku33(s1, 1).total,
+                            sakuOne33x2: getSaku33(s1, 2).total,
+                            sakuOne33x3: getSaku33(s1, 3).total,
+                            sakuOne33x4: getSaku33(s1, 4).total,
+                            sakuTwo25: hasTwo ? getSaku25(s2).total : 0,
+                            sakuTwo25a: hasTwo ? getSaku25a(s2).total : 0,
+                            sakuTwo33x1: hasTwo ? getSaku33(s2, 1).total : 0,
+                            sakuTwo33x2: hasTwo ? getSaku33(s2, 2).total : 0,
+                            sakuTwo33x3: hasTwo ? getSaku33(s2, 3).total : 0,
+                            sakuTwo33x4: hasTwo ? getSaku33(s2, 4).total : 0
                         },
                         api_cell_data: api_cell_data
                     }
@@ -211,7 +224,8 @@ let handleGameResponse = (e) => {
                     if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
                     return _item
                 });
-                let deck2 = combined_type != 0 ? _decks[1].api_ship.map(item => {
+                let hasTwo = combined_type != 0 && deck1_index == 0;
+                let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) _item.api_slotitem_ex = _item.api_slot_ex !== -1 ? _slotitems[item] : -1;
                     return _item
@@ -221,15 +235,27 @@ let handleGameResponse = (e) => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
                 })
-                let slot2 = combined_type != 0 ? deck2.map(item => {
+                let slot2 = hasTwo ? deck2.map(item => {
                     if (item) return item.api_slot.map(item => {
                         return item !== -1 ? _slotitems[item] : -1
                     })
                 }) : []
 
+                // 去掉撤回的船计算索敌
+                let s1 = {api_ship: JSON.parse(JSON.stringify(_decks[deck1_index].api_ship))}
+                let s2 = {api_ship: JSON.parse(JSON.stringify(_decks[1].api_ship))}
+                for(let i of escapeList) {
+                    if(i > 6) {
+                        s2.api_ship[i - 7] = -1;
+                    }else {
+                        s1.api_ship[i - 1] = -1;
+                    }
+                }
+
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
                 setTimeout(() => {
                     const data = {
+                        deck1_index,
                         deck1,
                         deck2,
                         slot1,
@@ -239,22 +265,22 @@ let handleGameResponse = (e) => {
                         mapLevels,
                         nextInfo: body,
                         escapeList: escapeList,
-                        combined_type: combined_type,
+                        combined_type: hasTwo ? combined_type : 0,
                         teitokuLv: _teitokuLv,
                         cell_ids: cell_ids,
                         saku: {
-                            sakuOne25: getSaku25(_decks[deck1_index]).total,
-                            sakuOne25a: getSaku25a(_decks[deck1_index]).total,
-                            sakuOne33x1: getSaku33(_decks[deck1_index], 1).total,
-                            sakuOne33x2: getSaku33(_decks[deck1_index], 2).total,
-                            sakuOne33x3: getSaku33(_decks[deck1_index], 3).total,
-                            sakuOne33x4: getSaku33(_decks[deck1_index], 4).total,
-                            sakuTwo25: combined_type != 0 ? getSaku25(_decks[1]).total : 0,
-                            sakuTwo25a: combined_type != 0 ? getSaku25a(_decks[1]).total : 0,
-                            sakuTwo33x1: combined_type != 0 ? getSaku33(_decks[1], 1).total : 0,
-                            sakuTwo33x2: combined_type != 0 ? getSaku33(_decks[1], 2).total : 0,
-                            sakuTwo33x3: combined_type != 0 ? getSaku33(_decks[1], 3).total : 0,
-                            sakuTwo33x4: combined_type != 0 ? getSaku33(_decks[1], 4).total : 0
+                            sakuOne25: getSaku25(s1).total,
+                            sakuOne25a: getSaku25a(s1).total,
+                            sakuOne33x1: getSaku33(s1, 1).total,
+                            sakuOne33x2: getSaku33(s1, 2).total,
+                            sakuOne33x3: getSaku33(s1, 3).total,
+                            sakuOne33x4: getSaku33(s1, 4).total,
+                            sakuTwo25: hasTwo ? getSaku25(s2).total : 0,
+                            sakuTwo25a: hasTwo ? getSaku25a(s2).total : 0,
+                            sakuTwo33x1: hasTwo ? getSaku33(s2, 1).total : 0,
+                            sakuTwo33x2: hasTwo ? getSaku33(s2, 2).total : 0,
+                            sakuTwo33x3: hasTwo ? getSaku33(s2, 3).total : 0,
+                            sakuTwo33x4: hasTwo ? getSaku33(s2, 4).total : 0
                         },
                         api_cell_data: api_cell_data
                     }

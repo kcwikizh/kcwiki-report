@@ -125,13 +125,29 @@ let handleGameResponse = (e) => {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) _item.api_slotitem_ex = (_item.api_slot_ex && _item.api_slot_ex !== -1) ? _slotitems[_item.api_slot_ex].api_slotitem_id : -1;
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
                     return _item
                 });
                 let hasTwo = combined_type != 0 && deck1_index == 0;
                 let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) _item.api_slotitem_ex = (_item.api_slot_ex && _item.api_slot_ex !== -1) ? _slotitems[_item.api_slot_ex].api_slotitem_id : -1;
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
                     return _item
                 }) : [];
                 let slot1 = deck1.map(item => {
@@ -221,13 +237,29 @@ let handleGameResponse = (e) => {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) _item.api_slotitem_ex = (_item.api_slot_ex && _item.api_slot_ex !== -1) ? _slotitems[_item.api_slot_ex].api_slotitem_id : -1;
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
                     return _item
                 });
                 let hasTwo = combined_type != 0 && deck1_index == 0;
                 let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) _item.api_slotitem_ex = (_item.api_slot_ex && _item.api_slot_ex !== -1) ? _slotitems[_item.api_slot_ex].api_slotitem_id : -1;
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
                     return _item
                 }) : [];
                 let slot1 = deck1.map(item => {

@@ -1,6 +1,7 @@
 let { _, SERVER_HOSTNAME } = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
+let quest_clear_id = -1, questlist = [];
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -8,7 +9,7 @@ import {
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync, reportBattle, reportBattleV2,
-    reportFrindly, reportAirBaseAttack, reportNextWayV2
+    reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest
 } from './report';
 import { getTykuV2, getSaku25, getSaku25a, getSaku33 } from './common';
 let handleBattleResult = (e) => {
@@ -375,6 +376,37 @@ let handleGameResponse = (e) => {
             escapeList = escapeList.concat(preEscape);
             preEscape = [];
             break;
+        case '/kcsapi/api_get_member/questlist':
+            let list = body.api_list
+            if(quest_clear_id !== -1) {
+                let current,after,detail;
+                current = quest_clear_id;
+                after = [];
+                detail = [];
+                for(let item of questlist) {
+                    if(item.api_no === quest_clear_id) {
+                        detail.push(item);
+                        break;
+                    }
+                }
+                let ids = questlist.map(i => i.api_no);
+                for(let item of list) {
+                    if(ids.indexOf(item.api_no) === -1) {
+                        after.push(item.api_no)
+                        detail.push(item)
+                    }
+                }
+                let data = {
+                    current: current,
+                    after: after,
+                    detail: detail
+                }
+                reportQuest(data)
+            }
+
+            quest_clear_id = -1;
+            questlist = list;
+            break;
     }
 };
 let handleGameRequest = (e) => {
@@ -382,6 +414,9 @@ let handleGameRequest = (e) => {
     switch (path) {
         case '/kcsapi/api_req_kaisou/remodeling':
             whenRemodel(body);
+            break;
+        case '/kcsapi/api_req_quest/clearitemget':
+            quest_clear_id = Number(body.api_quest_id);
             break;
     }
 };

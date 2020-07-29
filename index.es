@@ -2,6 +2,7 @@ let { _, SERVER_HOSTNAME } = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [];
+let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -76,12 +77,44 @@ let handleGameResponse = (e) => {
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
             if (typeof body.api_friendly_info !== "undefined" && body.api_friendly_info !== null) {
+                let deck1_index = Number(dock_id) - 1;
+                let deck1 = _decks[deck1_index].api_ship.map(item => {
+                    let _item = _ships[item];
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
+                    return _item
+                });
+                let hasTwo = combined_type != 0 && deck1_index == 0;
+                let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
+                    let _item = _ships[item];
+                    if (_item) {
+                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
+                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
+                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
+                        } else {
+                            _item.api_slotitem_ex = -1
+                            _item.api_slotitem_level = -1
+                        }
+                    }
+                    return _item
+                }) : [];
                 const data = {
                     ...body.api_friendly_info,
                     maparea_id: maparear_id,
                     mapinfo_no: mapinfo_no,
                     curCellId: curCellId,
-                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)]
+                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)],
+                    friendly_status: friendly_status,
+                    escapeList: escapeList,
+                    deck1: deck1,
+                    deck2: deck2
                 }
                 reportFrindly(data)
             }
@@ -95,6 +128,10 @@ let handleGameResponse = (e) => {
             enemyData = [];
             dropData = [];
             curCellId = -1;
+            if(body.api_friendly_setting) {
+                friendly_status.flag = body.api_friendly_setting.api_request_flag
+                friendly_status.type = body.api_friendly_setting.api_request_type
+            }
             break;
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);
@@ -406,6 +443,14 @@ let handleGameResponse = (e) => {
 
             quest_clear_id = -1;
             questlist = list;
+            break;
+        case '/kcsapi/api_req_member/set_friendly_request':
+            // success
+            if(body.api_result === 1) {
+                friendly_status.flag = postBody.api_request_flag
+                friendly_status.type = postBody.api_request_type
+            }
+            console.log('friendly_status2:', friendly_status)
             break;
     }
 };

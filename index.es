@@ -76,7 +76,7 @@ let handleGameResponse = (e) => {
                 seiku: seiku,
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
-            if (typeof body.api_friendly_info !== "undefined" && body.api_friendly_info !== null) {
+            if (/night/.test(path)) {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];

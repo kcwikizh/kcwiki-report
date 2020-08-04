@@ -1,5 +1,5 @@
 let { _, SERVER_HOSTNAME } = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, enemyData = [], dropData = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, bosscell_no = -1, enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [];
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
@@ -76,7 +76,8 @@ let handleGameResponse = (e) => {
                 seiku: seiku,
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
-            if (/night/.test(path)) {
+            // 过滤条件，夜战，邀请友军，活动海域，boss点
+            if (/night/.test(path) && friendly_status.flag === 1 && maparear_id > 40 && curCellId === bosscell_no) {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
@@ -253,6 +254,7 @@ let handleGameResponse = (e) => {
             cell_ids.push(body.api_no);
             reportGetLoseItem(body);
             curCellId = body.api_no;
+            bosscell_no = body.api_bosscell_no;
             cellData.push({
                 api_no: body.api_no,
                 api_next: body.api_next,

@@ -1,5 +1,5 @@
 let { _, SERVER_HOSTNAME } = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, bosscell_no = -1, enemyData = [], dropData = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, bosscells = [], enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [];
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
@@ -77,33 +77,15 @@ let handleGameResponse = (e) => {
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
             // 过滤条件，夜战，邀请友军，活动海域，boss点
-            if (/night/.test(path) && friendly_status.flag === 1 && maparear_id > 40 && curCellId === bosscell_no) {
+            if (/night/.test(path) && Number(friendly_status.flag) === 1 && maparear_id > 40 && bosscells.indexOf(curCellId) !== -1) {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) {
-                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
-                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
-                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
-                        } else {
-                            _item.api_slotitem_ex = -1
-                            _item.api_slotitem_level = -1
-                        }
-                    }
                     return _item
                 });
                 let hasTwo = combined_type != 0 && deck1_index == 0;
                 let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
-                    if (_item) {
-                        if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
-                            _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
-                            _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
-                        } else {
-                            _item.api_slotitem_ex = -1
-                            _item.api_slotitem_level = -1
-                        }
-                    }
                     return _item
                 }) : [];
                 const data = {
@@ -115,7 +97,8 @@ let handleGameResponse = (e) => {
                     friendly_status: friendly_status,
                     escapeList: escapeList,
                     deck1: deck1,
-                    deck2: deck2
+                    deck2: deck2,
+                    version: '3.1.23'
                 }
                 // 增加喷火数量
                 data.friendly_status.firenum = JSON.parse(localStorage._storeCache).info.resources[4]
@@ -142,6 +125,9 @@ let handleGameResponse = (e) => {
             cacheSync();
             break;
         case '/kcsapi/api_req_map/start':
+            // boss点位置
+            bosscells = body.api_cell_data.filter(i => { return i.api_color_no === 5 }).map(i => i.api_no)
+
             dock_id = postBody.api_deck_id;
             preEscape = [];
             escapeList = [];
@@ -254,7 +240,6 @@ let handleGameResponse = (e) => {
             cell_ids.push(body.api_no);
             reportGetLoseItem(body);
             curCellId = body.api_no;
-            bosscell_no = body.api_bosscell_no;
             cellData.push({
                 api_no: body.api_no,
                 api_next: body.api_next,

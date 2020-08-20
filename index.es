@@ -3,6 +3,7 @@ let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [];
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
+let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -98,11 +99,12 @@ let handleGameResponse = (e) => {
                     escapeList: escapeList,
                     deck1: deck1,
                     deck2: deck2,
-                    version: '3.1.23'
+                    version: '3.1.24'
                 }
                 // 增加喷火数量
                 data.friendly_status.firenum = JSON.parse(localStorage._storeCache).info.resources[4]
-                reportFrindly(data)
+                friendly_data = data
+                // reportFrindly(data)
             }
             break;
         case '/kcsapi/api_port/port':
@@ -118,6 +120,11 @@ let handleGameResponse = (e) => {
                 friendly_status.flag = body.api_friendly_setting.api_request_flag
                 friendly_status.type = body.api_friendly_setting.api_request_type
             }
+            if(friendly_data.version) {
+                friendly_data.friendly_status.firenum = body.api_material[4].api_value  // 喷火数量
+                reportFrindly(friendly_data)
+                friendly_data = {}
+            }
             break;
         case '/kcsapi/api_get_member/ship_deck':
             reportShipAttrByLevelUp(path);
@@ -125,6 +132,8 @@ let handleGameResponse = (e) => {
             cacheSync();
             break;
         case '/kcsapi/api_req_map/start':
+            // 重置友军数据
+            friendly_data = {}
             // boss点位置
             bosscells = body.api_cell_data.filter(i => { return i.api_color_no === 5 }).map(i => i.api_no)
 

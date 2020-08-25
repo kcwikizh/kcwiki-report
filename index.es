@@ -99,11 +99,11 @@ let handleGameResponse = (e) => {
                     escapeList: escapeList,
                     deck1: deck1,
                     deck2: deck2,
-                    version: '3.1.25'
+                    version: '3.1.26'
                 }
                 // 增加喷火数量
                 data.friendly_status.firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
-                data.friendly_status.version = '3.1.25'
+                data.friendly_status.version = '3.1.26'
                 friendly_data = data
                 // reportFrindly(data)
             }
@@ -135,6 +135,10 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_map/start':
             // 重置友军数据
             friendly_data = {}
+            if(body.api_eventmap && body.api_eventmap.api_selected_rank) {
+              friendly_status.max_maphp = body.api_eventmap.api_max_maphp
+              friendly_status.now_maphp = body.api_eventmap.api_now_maphp
+            }
             // boss点位置
             bosscells = body.api_cell_data.filter(i => { return i.api_color_no === 5 }).map(i => i.api_no)
 

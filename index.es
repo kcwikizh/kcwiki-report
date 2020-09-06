@@ -1,9 +1,11 @@
 let { _, SERVER_HOSTNAME } = window;
 let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, bosscells = [], enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
-let quest_clear_id = -1, questlist = [];
+let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
+let version = '3.1.27'
+
 import {
     reportInit, reportEnemy,
     reportShipAttr, reportShipAttrByLevelUp, whenMapStart,
@@ -99,11 +101,11 @@ let handleGameResponse = (e) => {
                     escapeList: escapeList,
                     deck1: deck1,
                     deck2: deck2,
-                    version: '3.1.26'
+                    version: version
                 }
                 // 增加喷火数量
                 data.friendly_status.firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
-                data.friendly_status.version = '3.1.26'
+                data.friendly_status.version = version
                 friendly_data = data
                 // reportFrindly(data)
             }
@@ -418,7 +420,9 @@ let handleGameResponse = (e) => {
             break;
         case '/kcsapi/api_get_member/questlist':
             let list = body.api_list
-            if(quest_clear_id !== -1) {
+
+            let date = parseInt(parseInt(new Date().getTime()/1000/60/60+4)/24)
+            if(quest_clear_id !== -1 && date === questDate) {
                 let current,after,detail;
                 current = quest_clear_id;
                 after = [];
@@ -439,13 +443,15 @@ let handleGameResponse = (e) => {
                 let data = {
                     current: current,
                     after: after,
-                    detail: detail
+                    detail: detail,
+                    version: version
                 }
                 reportQuest(data)
             }
 
             quest_clear_id = -1;
             questlist = list;
+            questDate = parseInt(parseInt(new Date().getTime()/1000/60/60+4)/24)
             break;
         case '/kcsapi/api_req_member/set_friendly_request':
             // success

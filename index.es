@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.1.27'
+let version = '3.1.28'
 
 import {
     reportInit, reportEnemy,
@@ -125,6 +125,7 @@ let handleGameResponse = (e) => {
             }
             if(friendly_data.version) {
                 friendly_data.friendly_status.firenum = body.api_material[4].api_value  // 喷火数量
+                friendly_data.version = version
                 reportFrindly(friendly_data)
                 friendly_data = {}
             }
@@ -218,15 +219,18 @@ let handleGameResponse = (e) => {
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
                 setTimeout(() => {
                     const data = {
-                        deck1_index,
+                        // deck1_index,
                         deck1,
                         deck2,
                         slot1,
                         slot2,
                         cell_ids,
-                        curCellId,
+                        // curCellId,
                         mapLevels,
-                        nextInfo: body,
+                        nextInfo: {
+                            api_maparea_id: body.api_maparea_id,
+                            api_mapinfo_no: body.api_mapinfo_no,
+                        },
                         escapeList: escapeList,
                         combined_type: hasTwo ? combined_type : 0,
                         teitokuLv: _teitokuLv,
@@ -245,8 +249,29 @@ let handleGameResponse = (e) => {
                             sakuTwo33x3: hasTwo ? getSaku33(s2, 3).total : 0,
                             sakuTwo33x4: hasTwo ? getSaku33(s2, 4).total : 0
                         },
-                        api_cell_data: api_cell_data
+                        api_cell_data: api_cell_data,
+                        version: version
                     }
+                    data.deck1 = data.deck1.map(i => {
+                        return i ? {
+                            api_ship_id: i.api_ship_id,
+                            api_lv: i.api_lv,
+                            api_sally_area: i.api_sally_area,
+                            api_soku: i.api_soku,
+                            api_slotitem_ex: i.api_slotitem_ex,
+                            api_slotitem_level: i.api_slotitem_level
+                        } : i
+                    })
+                    data.deck2 = data.deck2.map(i => {
+                        return i ? {
+                            api_ship_id: i.api_ship_id,
+                            api_lv: i.api_lv,
+                            api_sally_area: i.api_sally_area,
+                            api_soku: i.api_soku,
+                            api_slotitem_ex: i.api_slotitem_ex,
+                            api_slotitem_level: i.api_slotitem_level
+                        } : i
+                    })
                     reportNextWayV2(data)
                 }, 500)
 
@@ -272,7 +297,8 @@ let handleGameResponse = (e) => {
                     maparea_id: maparear_id,
                     mapinfo_no: mapinfo_no,
                     curCellId: curCellId,
-                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)]
+                    mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)],
+                    version: version
                 }
                 reportAirBaseAttack(data)
             }
@@ -330,15 +356,18 @@ let handleGameResponse = (e) => {
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
                 setTimeout(() => {
                     const data = {
-                        deck1_index,
+                        // deck1_index,
                         deck1,
                         deck2,
                         slot1,
                         slot2,
                         cell_ids,
-                        curCellId,
+                        // curCellId,
                         mapLevels,
-                        nextInfo: body,
+                        nextInfo: {
+                            api_maparea_id: body.api_maparea_id,
+                            api_mapinfo_no: body.api_mapinfo_no,
+                        },
                         escapeList: escapeList,
                         combined_type: hasTwo ? combined_type : 0,
                         teitokuLv: _teitokuLv,
@@ -357,8 +386,29 @@ let handleGameResponse = (e) => {
                             sakuTwo33x3: hasTwo ? getSaku33(s2, 3).total : 0,
                             sakuTwo33x4: hasTwo ? getSaku33(s2, 4).total : 0
                         },
-                        api_cell_data: api_cell_data
+                        api_cell_data: api_cell_data,
+                        version: version
                     }
+                    data.deck1 = data.deck1.map(i => {
+                        return i ? {
+                            api_ship_id: i.api_ship_id,
+                            api_lv: i.api_lv,
+                            api_sally_area: i.api_sally_area,
+                            api_soku: i.api_soku,
+                            api_slotitem_ex: i.api_slotitem_ex,
+                            api_slotitem_level: i.api_slotitem_level
+                        } : i
+                    })
+                    data.deck2 = data.deck2.map(i => {
+                        return i ? {
+                            api_ship_id: i.api_ship_id,
+                            api_lv: i.api_lv,
+                            api_sally_area: i.api_sally_area,
+                            api_soku: i.api_soku,
+                            api_slotitem_ex: i.api_slotitem_ex,
+                            api_slotitem_level: i.api_slotitem_level
+                        } : i
+                    })
                     reportNextWayV2(data)
                 }, 500)
 
@@ -446,7 +496,9 @@ let handleGameResponse = (e) => {
                     detail: detail,
                     version: version
                 }
-                reportQuest(data)
+                if(after.length) {
+                    reportQuest(data)
+                }
             }
 
             quest_clear_id = -1;

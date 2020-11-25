@@ -1,10 +1,10 @@
 let { _, SERVER_HOSTNAME } = window;
-let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], cellData = [], curCellId = -1, bosscells = [], enemyData = [], dropData = [];
+let seiku = -1, eSlot = [], eKyouka = [], dock_id = 0, ship_id = [], ship_ke = [], mapinfo_no = -1, cell_ids = [], maparear_id = -1, mapLevels = [], mapGauges = [], mapinfo = {}, cellData = [], curCellId = -1, bosscells = [], enemyData = [], dropData = [];
 let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.1.28'
+let version = '3.2.1'
 
 import {
     reportInit, reportEnemy,
@@ -217,6 +217,7 @@ let handleGameResponse = (e) => {
                 }
 
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
+                const key = String(maparear_id) + String(mapinfo_no)
                 setTimeout(() => {
                     const data = {
                         // deck1_index,
@@ -230,6 +231,10 @@ let handleGameResponse = (e) => {
                         nextInfo: {
                             api_maparea_id: body.api_maparea_id,
                             api_mapinfo_no: body.api_mapinfo_no,
+                            api_defeat_count: mapinfo[key].api_defeat_count,
+                            api_required_defeat_count: mapinfo[key].api_required_defeat_count,
+                            api_now_maphp: mapinfo[key].api_now_maphp,
+                            api_max_maphp: mapinfo[key].api_max_maphp,
                         },
                         escapeList: escapeList,
                         combined_type: hasTwo ? combined_type : 0,
@@ -354,6 +359,7 @@ let handleGameResponse = (e) => {
                 }
 
                 // 设置延迟是因为更新escapeList的接口goback_port返回可能比较慢
+                const key = String(maparear_id) + String(mapinfo_no)
                 setTimeout(() => {
                     const data = {
                         // deck1_index,
@@ -367,6 +373,10 @@ let handleGameResponse = (e) => {
                         nextInfo: {
                             api_maparea_id: body.api_maparea_id,
                             api_mapinfo_no: body.api_mapinfo_no,
+                            api_defeat_count: mapinfo[key].api_defeat_count,
+                            api_required_defeat_count: mapinfo[key].api_required_defeat_count,
+                            api_now_maphp: mapinfo[key].api_now_maphp,
+                            api_max_maphp: mapinfo[key].api_max_maphp,
                         },
                         escapeList: escapeList,
                         combined_type: hasTwo ? combined_type : 0,
@@ -434,9 +444,15 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_get_member/mapinfo':
             for (const map of body.api_map_info) {
                 mapLevels[map.api_id] = 0;
+                mapinfo[map.api_id] = {
+                    api_defeat_count: map.api_defeat_count,
+                    api_required_defeat_count: map.api_required_defeat_count
+                }
                 if (map.api_eventmap != null) {
                     mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
                     mapGauges[map.api_id] = map.api_eventmap.api_gauge_num;
+                    mapinfo[map.api_id].api_now_maphp = map.api_eventmap.api_now_maphp
+                    mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp
                 }
             }
             break;

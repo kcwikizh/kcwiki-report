@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.3'
+let version = '3.2.4'
 
 import {
     reportInit, reportEnemy,
@@ -451,8 +451,8 @@ let handleGameResponse = (e) => {
                 if (map.api_eventmap != null) {
                     mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
                     mapGauges[map.api_id] = map.api_eventmap.api_gauge_num;
-                    mapinfo[map.api_id].api_now_maphp = map.api_eventmap.api_now_maphp
-                    mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp
+                    mapinfo[map.api_id].api_now_maphp = map.api_eventmap.api_now_maphp || 0
+                    mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp || 0
                 }
             }
             break;

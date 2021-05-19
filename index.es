@@ -480,6 +480,7 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_hensei/combined':
             combined_type = postBody.api_combined_type
             break;
+        case '/kcsapi/api_req_sortie/goback_port':
         case '/kcsapi/api_req_combined_battle/goback_port':
             escapeList = escapeList.concat(preEscape);
             preEscape = [];

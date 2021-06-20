@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.4'
+let version = '3.2.6'
 
 import {
     reportInit, reportEnemy,
@@ -106,6 +106,7 @@ let handleGameResponse = (e) => {
                 // 增加喷火数量
                 data.friendly_status.firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
                 data.friendly_status.version = version
+                data.api_friendly_battle = body.api_friendly_battle
                 friendly_data = data
                 // reportFrindly(data)
             }

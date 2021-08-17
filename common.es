@@ -144,8 +144,9 @@ const getSaku25 = (deck) => {
             continue;
 
         shipSaku += ship.api_sakuteki[0];
-        for (let i = 0; i < ship.api_slot.length; i++) {
-            let slotId = ship.api_slot[i];
+        let api_slot = ship.api_slot.concat([ship.api_slot_ex])
+        for (let i = 0; i < api_slot.length; i++) {
+            let slotId = api_slot[i];
             if (slotId === -1)
                 continue;
             let _equip = _slotitems[slotId];
@@ -202,8 +203,9 @@ const getSaku25a = (deck) => {
             continue;
 
         let shipPureSaku = ship.api_sakuteki[0];
-        for (let i = 0; i < ship.api_slot.length; i++) {
-            let slotId = ship.api_slot[i];
+        let api_slot = ship.api_slot.concat([ship.api_slot_ex])
+        for (let i = 0; i < api_slot.length; i++) {
+            let slotId = api_slot[i];
             if (slotId === -1)
                 continue;
             let _equip = _slotitems[slotId];
@@ -296,8 +298,9 @@ const getSaku33 = (deck, mapModifier) => {
 
         emptySlot -= 1;
         let shipPureSaku = ship.api_sakuteki[0];
-        for (let i = 0; i < ship.api_slot.length; i++) {
-            let slotId = ship.api_slot[i];
+        let api_slot = ship.api_slot.concat([ship.api_slot_ex])
+        for (let i = 0; i < api_slot.length; i++) {
+            let slotId = api_slot[i];
             if (slotId === -1)
                 continue;
             let _equip = _slotitems[slotId];
@@ -311,19 +314,19 @@ const getSaku33 = (deck, mapModifier) => {
                     equipSaku += $equip.api_saku * 0.8;
                     break;
                 case 9:
-                    equipSaku += $equip.api_saku * 1.0;
+                    equipSaku += ($equip.api_saku + 1.2 * Math.sqrt(_equip.api_level || 0)) * 1.0;
                     break;
                 case 10:
                     equipSaku += ($equip.api_saku + 1.2 * Math.sqrt(_equip.api_level || 0)) * 1.2;
                     break;
                 case 11:
-                    equipSaku += $equip.api_saku * 1.1;
+                    equipSaku += ($equip.api_saku + 1.15 * Math.sqrt(_equip.api_level || 0)) * 1.1;
                     break;
                 case 12:
                     equipSaku += ($equip.api_saku + 1.25 * Math.sqrt(_equip.api_level || 0)) * 0.6;
                     break;
                 case 13:
-                    equipSaku += ($equip.api_saku + 1.25 * Math.sqrt(_equip.api_level || 0)) * 0.6;
+                    equipSaku += ($equip.api_saku + 1.4 * Math.sqrt(_equip.api_level || 0)) * 0.6;
                     break;
                 default:
                     equipSaku += $equip.api_saku * 0.6;

@@ -4,7 +4,9 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.6'
+let version = '3.2.7'
+let formation = ''        // 阵型选择
+
 
 import {
     reportInit, reportEnemy,
@@ -79,6 +81,8 @@ let handleGameResponse = (e) => {
                 seiku: seiku,
                 tyku: (_decks.length >= dock_id && dock_id > 0) ? getTykuV2(_decks[dock_id - 1]) : -1,
             });
+
+            if(postBody.api_formation) formation = postBody.api_formation // 选择的阵型
             // 过滤条件，夜战，邀请友军，活动海域，boss点
             if (/night/.test(path) && Number(friendly_status.flag) === 1 && maparear_id > 40 && bosscells.indexOf(curCellId) !== -1) {
                 let deck1_index = Number(dock_id) - 1;
@@ -99,6 +103,12 @@ let handleGameResponse = (e) => {
                     mapLevel: mapLevels[String(maparear_id) + String(mapinfo_no)],
                     friendly_status: friendly_status,
                     escapeList: escapeList,
+                    formation: formation,  // 阵型选择
+                    enemy: {
+                        api_ship_ke: body.api_ship_ke,  // 敌舰id数组
+                        api_e_nowhps: body.api_e_nowhps, //  昼战后剩余血量
+                        api_xal01: body.api_xal01,       // 是否削甲
+                    },
                     deck1: deck1,
                     deck2: deck2,
                     version: version

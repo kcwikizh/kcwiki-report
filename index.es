@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.10'
+let version = '3.2.11'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 
@@ -84,8 +84,8 @@ let handleGameResponse = (e) => {
 
             if(postBody.api_formation) formation = postBody.api_formation // 选择的阵型
             if(body.api_xal01) api_xal01 = body.api_xal01   // 是否削甲
-            // 过滤条件，夜战，邀请友军，活动海域，boss点
-            if (/night/.test(path) && Number(friendly_status.flag) === 1 && maparear_id > 40 && (bosscells.indexOf(curCellId) !== -1 || (bosscells.indexOf(curCellId) === -1 && body.api_friendly_info))) {
+            // 过滤条件，夜战且邀请友军且活动海域且boss点 或者 (非boss点且有友军数据)
+            if (/night/.test(path) && Number(friendly_status.flag) === 1 && maparear_id > 40 && bosscells.indexOf(curCellId) !== -1 || (bosscells.indexOf(curCellId) === -1 && body.api_friendly_info)) {
                 let deck1_index = Number(dock_id) - 1;
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];

@@ -4,9 +4,10 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.11'
+let version = '3.2.12'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
+let firenumBefore = 0     // 进入海图时的喷火数量
 
 import {
     reportInit, reportEnemy,
@@ -114,8 +115,6 @@ let handleGameResponse = (e) => {
                     deck2: deck2,
                     version: version
                 }
-                // 增加喷火数量
-                data.friendly_status.firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
                 data.friendly_status.version = version
                 data.api_friendly_battle = body.api_friendly_battle
                 friendly_data = data
@@ -136,6 +135,7 @@ let handleGameResponse = (e) => {
                 friendly_status.type = body.api_friendly_setting.api_request_type
             }
             if(friendly_data.version) {
+                friendly_data.friendly_status.firenumBefore = firenumBefore
                 friendly_data.friendly_status.firenum = body.api_material[4].api_value  // 喷火数量
                 friendly_data.version = version
                 reportFrindly(friendly_data)
@@ -150,6 +150,9 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_map/start':
             // 重置友军数据
             friendly_data = {}
+            // 进图时喷火数量
+            firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
+
             if(body.api_eventmap && body.api_eventmap.api_selected_rank) {
               friendly_status.max_maphp = body.api_eventmap.api_max_maphp
               friendly_status.now_maphp = body.api_eventmap.api_now_maphp
@@ -497,6 +500,7 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_sortie/goback_port':
         case '/kcsapi/api_req_combined_battle/goback_port':
             escapeList = escapeList.concat(preEscape);
+            escapeList = Array.from(new Set(escapeList))    // 去重
             preEscape = [];
             break;
         case '/kcsapi/api_get_member/questlist':

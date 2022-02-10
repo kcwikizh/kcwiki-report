@@ -327,7 +327,7 @@ const reportInitEquipByBuild = async (body, _ships) => {
 const reportInitEquipByRemodel = async () => {
     if (_remodelShips.length == 0) return;
     let data = {};
-    for (let apiId in _remodelShips) {
+    for (let apiId of _remodelShips) {
         apiId = parseInt(apiId);
         let ship = _ships[apiId];
         data[ship] = ship.api_slot.filter(slot => slot != -1).map(slot => _slotitems[slot].api_sortno);

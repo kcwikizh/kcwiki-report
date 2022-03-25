@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.16'
+let version = '3.2.17'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -108,8 +108,9 @@ let handleGameResponse = (e) => {
                     formation: formation,  // 阵型选择
                     enemy: {
                         api_ship_ke: body.api_ship_ke,  // 敌舰id数组
-                        api_ship_ke2: body.api_ship_ke_combined ? body.api_ship_ke_combined : [], // 联合敌舰2队id数组
+                        api_ship_ke_combined: body.api_ship_ke_combined ? body.api_ship_ke_combined : [], // 联合敌舰2队id数组
                         api_e_nowhps: body.api_e_nowhps, //  昼战后剩余血量
+                        api_e_nowhps_combined: body.api_e_nowhps_combined ? body.api_e_nowhps_combined : [], //  昼战后联合敌舰2队剩余血量
                         api_xal01: api_xal01,       // 是否削甲
                     },
                     deck1: deck1,

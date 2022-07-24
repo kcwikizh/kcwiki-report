@@ -511,6 +511,16 @@ const reportQuest = async (body) => {
     }
 }
 
+const battleQuest = async (body) => {
+    if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { form: body });
+
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+            console.log(`battle.action response: ${repData}`);
+        cache.put(body);
+    }
+}
+
 const cacheSync = () => {
     fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -635,6 +645,7 @@ export {
     reportAirBaseAttack,
     reportNextWayV2,
     reportQuest,
+    battleQuest,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

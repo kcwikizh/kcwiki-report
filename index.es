@@ -4,10 +4,13 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.18'
+let version = '3.2.19'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
+let battle_data = {}      //  战斗详情数据包，result结算时发送
+let api_air_base = []     // 陆航信息
+let hasLBAC = false       // 陆航是否出击
 
 import {
     reportInit, reportEnemy,
@@ -16,7 +19,7 @@ import {
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync, reportBattle, reportBattleV2,
-    reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest, battleQuest
+    reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest, reportBattleDetail
 } from './report';
 import { getTykuV2, getSaku25, getSaku25a, getSaku33 } from './common';
 let handleBattleResult = (e) => {
@@ -123,22 +126,36 @@ let handleGameResponse = (e) => {
                 friendly_data = data
                 // reportFrindly(data)
             }
-            const battle_info = {
-                teitokuLv: _teitokuLv,
-                packet: body,
-                combined_type: hasTwo ? combined_type : 0,
-                path: path,
-                deck1: deck1,
-                deck2: deck2,
-                maparea_id: maparear_id,
-                mapinfo_no: mapinfo_no,
-                curCellId: curCellId,
-                formation: formation, // 阵型选择
-                version: version
+            body.time = new Date().getTime()
+            body.path = path
+            if(!battle_data.data || !battle_data.data.packet) {
+                battle_data = {
+                    data: {
+                        fleet: {
+                            LBAC: null,
+                            escort: deck2,
+                            main: deck1,
+                            support: null,
+                            type: hasTwo ? combined_type : 0
+                        },
+                        map: [maparear_id, mapinfo_no, curCellId],
+                        packet: [
+                            body
+                        ],
+                        type: 'boss',
+                        version: version
+                    }
+                }
+            } else {
+                battle_data.data.packet.push(body)
             }
-            battleQuest({
-                data: battle_info
-            })
+            // 支援舰队
+            if(body.api_support_info) {
+                battle_data.fleet.support = _decks[body.api_support_info.api_support_hourai.api_deck_id - 1].api_ship.map(item => {
+                    let _item = _ships[item];
+                    return _item
+                })
+            }
             break;
         case '/kcsapi/api_port/port':
             combined_type = body.api_combined_flag;
@@ -169,6 +186,9 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_map/start':
             // 重置友军数据
             friendly_data = {}
+            // 重置战斗数据
+            battle_data = {}
+            hasLBAC = false
             // 进图时喷火数量
             firenumBefore = JSON.parse(localStorage._storeCache).info.resources[4]
 
@@ -478,6 +498,7 @@ let handleGameResponse = (e) => {
         //    reportShipAttr(body.api_data);
         //    break;
         case '/kcsapi/api_get_member/mapinfo':
+            api_air_base = body.api_air_base
             for (const map of body.api_map_info) {
                 mapLevels[map.api_id] = 0;
                 mapinfo[map.api_id] = {
@@ -491,6 +512,10 @@ let handleGameResponse = (e) => {
                     mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp || 0
                 }
             }
+            break;
+        case '/kcsapi/api_req_map/start_air_base':
+            // 设置陆航
+            hasLBAC = true
             break;
         case '/kcsapi/api_req_map/select_eventmap_rank':
             const mapareaId = parseInt(postBody.api_maparea_id) * 10 + parseInt(postBody.api_map_no);
@@ -512,6 +537,29 @@ let handleGameResponse = (e) => {
                 if (body.api_escape.api_escape_idx && body.api_escape.api_escape_idx[0]) preEscape.push(body.api_escape.api_escape_idx[0])
                 if (body.api_escape.api_tow_idx && body.api_escape.api_tow_idx[0]) preEscape.push(body.api_escape.api_tow_idx[0])
             }
+
+            body.time = new Date().getTime()
+            body.path = path
+            if(battle_data.data && battle_data.data.packet) {
+                battle_data.data.packet.push(body)
+                if(hasLBAC) {
+                    let LBAC = []
+
+                    api_air_base.filter(i => {
+                        return i.api_area_id === battle_data.data.map[0] && i.api_action_kind === 1
+                    }).map(i => {
+                        i = Object.clone(i)
+                        i.api_plane_info = i.api_plane_info.map(item => {
+                            item.slot = _slotitems[item.api_slotid] || null
+                            delete item.api_slotid
+                            return item
+                        })
+                        LBAC.push(i)
+                    })
+                    battle_data.data.LBAC = LBAC
+                }
+                reportBattleDetail(battle_data)
+                battle_data = {}
             break;
         case '/kcsapi/api_req_hensei/combined':
             combined_type = postBody.api_combined_type

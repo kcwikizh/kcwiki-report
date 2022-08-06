@@ -511,7 +511,7 @@ const reportQuest = async (body) => {
     }
 }
 
-const battleQuest = async (body) => {
+const reportBattleDetail = async (body) => {
     if (cache.miss(body)) {
         let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { form: body });
 
@@ -645,7 +645,7 @@ export {
     reportAirBaseAttack,
     reportNextWayV2,
     reportQuest,
-    battleQuest,
+    reportBattleDetail,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

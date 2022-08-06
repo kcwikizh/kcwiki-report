@@ -560,6 +560,7 @@ let handleGameResponse = (e) => {
                 }
                 reportBattleDetail(battle_data)
                 battle_data = {}
+            }
             break;
         case '/kcsapi/api_req_hensei/combined':
             combined_type = postBody.api_combined_type

@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.21'
+let version = '3.2.22'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -126,14 +126,14 @@ let handleGameResponse = (e) => {
                 friendly_data = data
                 // reportFrindly(data)
             }
-            body.time = new Date().getTime()
-            body.path = path
+            body.poi_time = new Date().getTime()
+            body.poi_path = path
             if(!battle_data.data || !battle_data.data.packet) {
                 battle_data = {
                     data: {
                         fleet: {
                             LBAC: null,
-                            escort: deck2,
+                            escort: hasTwo ? deck2 : null,
                             main: deck1,
                             support: null,
                             type: hasTwo ? combined_type : 0
@@ -538,8 +538,8 @@ let handleGameResponse = (e) => {
                 if (body.api_escape.api_tow_idx && body.api_escape.api_tow_idx[0]) preEscape.push(body.api_escape.api_tow_idx[0])
             }
 
-            body.time = new Date().getTime()
-            body.path = path
+            body.poi_time = new Date().getTime()
+            body.poi_path = path
             if(battle_data.data && battle_data.data.packet) {
                 battle_data.data.packet.push(body)
                 if(hasLBAC) {
@@ -550,14 +550,15 @@ let handleGameResponse = (e) => {
                     }).map(i => {
                         i = Object.clone(i)
                         i.api_plane_info = i.api_plane_info.map(item => {
-                            item.slot = _slotitems[item.api_slotid] || null
+                            item.poi_slot = _slotitems[item.api_slotid] || null
                             delete item.api_slotid
                             return item
                         })
                         LBAC.push(i)
                     })
-                    battle_data.data.LBAC = LBAC
+                    battle_data.data.fleet.LBAC = LBAC
                 }
+                battle_data.data.time = new Date().getTime()
                 reportBattleDetail(battle_data)
                 battle_data = {}
             }

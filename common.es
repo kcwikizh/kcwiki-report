@@ -378,6 +378,15 @@ const hashCode = val => val.split('').reduce((h, ch) => {
     return h;
 }, 0);
 
+/** @type {(ship: {api_slot?: number[]; poi_slot: undefined}) => {api_slot?: number[]; poi_slot?: number[]}} */
+const appendSlotitemDetail = (ship) => {
+    const { _slotitems } = window;
+    const ret = {...ship, poi_slot: undefined};
+    if (ship.api_slot)
+        ret.poi_slot = ship.api_slot.map(x => _slotitems[x]);
+    return ret;
+}
+
 export {
     getTyku,
     getTykuV2,
@@ -386,5 +395,6 @@ export {
     getSaku33,
     sum,
     hashCode,
-    HashTable
+    HashTable,
+    appendSlotitemDetail,
 };

@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.2.22'
+let version = '3.2.23'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -21,7 +21,7 @@ import {
     reoprtTyku, cacheSync, reportBattle, reportBattleV2,
     reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest, reportBattleDetail
 } from './report';
-import { getTykuV2, getSaku25, getSaku25a, getSaku33 } from './common';
+import { getTykuV2, getSaku25, getSaku25a, getSaku33, appendSlotitemDetail } from './common';
 let handleBattleResult = (e) => {
     if (seiku != -1) {
         let { rank, map, mapCell, dropShipId, deckShipId } = e.detail;
@@ -39,10 +39,12 @@ let handleGameResponse = (e) => {
         case '/kcsapi/api_req_sortie/battle':
         case '/kcsapi/api_req_sortie/airbattle':
         case '/kcsapi/api_req_sortie/ld_airbattle':
+        case '/kcsapi/api_req_sortie/ld_shooting':
         case '/kcsapi/api_req_combined_battle/battle':
         case '/kcsapi/api_req_combined_battle/battle_water':
         case '/kcsapi/api_req_combined_battle/airbattle':
         case '/kcsapi/api_req_combined_battle/ld_airbattle':
+        case '/kcsapi/api_req_combined_battle/ld_shooting':
         case '/kcsapi/api_req_combined_battle/ec_battle':
         case '/kcsapi/api_req_combined_battle/each_battle':
         case '/kcsapi/api_req_combined_battle/each_battle_water':
@@ -92,12 +94,12 @@ let handleGameResponse = (e) => {
             let deck1_index = Number(dock_id) - 1;
             let deck1 = _decks[deck1_index].api_ship.map(item => {
                 let _item = _ships[item];
-                return _item
+                return appendSlotitemDetail(_item)
             });
             let hasTwo = combined_type && combined_type !== 0 && deck1_index == 0;
             let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                 let _item = _ships[item];
-                return _item
+                return appendSlotitemDetail(_item)
             }) : [];
             // 过滤条件，夜战且邀请友军且活动海域且boss点 或者 (非boss点且有友军数据)
             if (/night/.test(path) && Number(friendly_status.flag) === 1 && maparear_id > 40 && bosscells.indexOf(curCellId) !== -1 || (bosscells.indexOf(curCellId) === -1 && body.api_friendly_info)) {
@@ -152,7 +154,7 @@ let handleGameResponse = (e) => {
             // 支援舰队
             if(body.api_support_info) {
                 battle_data.fleet.support = _decks[body.api_support_info.api_support_hourai.api_deck_id - 1].api_ship.map(item => {
-                    let _item = _ships[item];
+                    let _item = appendSlotitemDetail(_ships[item]);
                     return _item
                 })
             }

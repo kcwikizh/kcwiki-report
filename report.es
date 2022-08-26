@@ -473,7 +473,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
 
 const reportFrindly = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`friendly.action response: ${repData}`);
@@ -483,7 +483,7 @@ const reportFrindly = async (body) => {
 
 const reportAirBaseAttack = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`airbaseattack.action response: ${repData}`);
@@ -493,7 +493,7 @@ const reportAirBaseAttack = async (body) => {
 
 const reportNextWayV2 = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way_v2`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way_v2`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`nextway.action response: ${repData}`);
@@ -503,7 +503,7 @@ const reportNextWayV2 = async (body) => {
 
 const reportQuest = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/quest`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/quest`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`quest.action response: ${repData}`);
@@ -513,7 +513,7 @@ const reportQuest = async (body) => {
 
 const reportBattleDetail = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response: ${repData}`);

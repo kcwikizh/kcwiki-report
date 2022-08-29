@@ -513,7 +513,7 @@ const reportQuest = async (body) => {
 
 const reportBattleDetail = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { form: body });
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { body, json: true });
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response: ${repData}`);

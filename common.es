@@ -378,12 +378,14 @@ const hashCode = val => val.split('').reduce((h, ch) => {
     return h;
 }, 0);
 
-/** @type {(ship: {api_slot?: number[]; poi_slot: undefined}) => {api_slot?: number[]; poi_slot?: number[]}} */
+/** @type {(ship: {api_slot?: number[]; api_slot_ex?: number;}) => any} */
 const appendSlotitemDetail = (ship) => {
     const { _slotitems } = window;
-    const ret = {...ship, poi_slot: undefined};
+    const ret = {...ship, poi_slot: undefined, poi_slot_ex: undefined};
     if (ship.api_slot)
         ret.poi_slot = ship.api_slot.map(x => _slotitems[x]);
+    if (ship.api_slot_ex && ship.api_slot_ex !== -1)
+        ret.poi_slot_ex = _slotitems[ship.api_slot_ex];
     return ret;
 }
 

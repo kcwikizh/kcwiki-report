@@ -6,9 +6,9 @@ if (_ === "undefined") {
         _ = require('underscore');
     }
 }
-Promise = require('bluebird');
-let fs = Promise.promisifyAll(require('fs-extra'));
-let request = Promise.promisifyAll(require('request'), { multiArgs: true });
+let bluebird = require('bluebird');
+let fs = bluebird.promisifyAll(require('fs-extra'));
+let request = bluebird.promisifyAll(require('request'), { multiArgs: true });
 
 import { getTyku, getTykuV2, getSaku25, getSaku25a, getSaku33, sum, hashCode, HashTable } from './common';
 import { join } from 'path';

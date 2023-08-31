@@ -386,7 +386,7 @@ const appendSlotitemDetail = (ship) => {
         ret.poi_slot = ship.api_slot.map(x => _slotitems[x]);
     if (ship.api_slot_ex && ship.api_slot_ex !== -1)
         ret.poi_slot_ex = _slotitems[ship.api_slot_ex];
-    return ret;
+    return Object.clone(ret);
 }
 
 export {

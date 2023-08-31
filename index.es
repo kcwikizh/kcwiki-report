@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.3.3'
+let version = '3.3.4'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -143,6 +143,10 @@ let handleGameResponse = (e) => {
                             support: null,
                             type: hasTwo ? combined_type : 0
                         },
+                        fleetAfter: {
+                            main: [],
+                            escort: []
+                        },
                         map: [maparear_id, mapinfo_no, curCellId],
                         packet: [
                             body
@@ -163,6 +167,21 @@ let handleGameResponse = (e) => {
             }
             break;
         case '/kcsapi/api_port/port':
+            // 延迟是等_ships更新
+            setTimeout(() => {
+                if(battle_data.data && battle_data.data.packet) {
+                    battle_data.data.fleet.main.map(item => {
+                        battle_data.data.fleetAfter.main.push(Object.clone(_ships[item.api_id]))
+                    })
+                    if(battle_data.data.fleet.escort) {
+                        battle_data.data.fleet.escort.map(item => {
+                            battle_data.data.fleetAfter.escort.push(Object.clone(_ships[item.api_id]))
+                        })
+                    }
+                    reportBattleDetail(battle_data)
+                    battle_data = {}
+                }
+            }, 500)
             combined_type = body.api_combined_flag;
             reportBattle(mapinfo_no, maparear_id, cell_ids, _decks, dock_id, _ships);
             reportBattleV2(mapinfo_no, maparear_id, mapLevels, mapGauges, cellData, dock_id, enemyData, dropData, body.api_combined_flag);
@@ -344,6 +363,21 @@ let handleGameResponse = (e) => {
             }
             break;
         case '/kcsapi/api_req_map/next':
+            // 延迟是等_ships更新
+            setTimeout(() => {
+                if(battle_data.data && battle_data.data.packet) {
+                    battle_data.data.fleet.main.map(item => {
+                        battle_data.data.fleetAfter.main.push(Object.clone(_ships[item.api_id]))
+                    })
+                    if(battle_data.data.fleet.escort) {
+                        battle_data.data.fleet.escort.map(item => {
+                            battle_data.data.fleetAfter.escort.push(Object.clone(_ships[item.api_id]))
+                        })
+                    }
+                    reportBattleDetail(battle_data)
+                    battle_data = {}
+                }
+            }, 500)
             cell_ids.push(body.api_no);
             reportGetLoseItem(body);
             curCellId = body.api_no;
@@ -567,8 +601,6 @@ let handleGameResponse = (e) => {
                 battle_data.data.mapLevel = mapLevels[String(maparear_id) + String(mapinfo_no)]
                 battle_data.data.time = new Date().getTime()
                 if(api_smoke_flag) battle_data.data.api_smoke_flag = api_smoke_flag
-                reportBattleDetail(battle_data)
-                battle_data = {}
                 api_smoke_flag = null
             }
             break;

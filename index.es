@@ -4,11 +4,12 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.3.4'
+let version = '3.3.5'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
-let battle_data = {}      //  战斗详情数据包，result结算时发送
+let battle_data = {}      // 战斗详情数据包，为了记录战后舰娘状态，next或回港时存入list
+let battle_data_list = [] // 战斗详情数据包列表，为了记录陆航更新数据，再次进入出击界面时发送
 let api_air_base = []     // 陆航信息
 let hasLBAC = false       // 陆航是否出击
 let api_smoke_flag = null // 烟幕信息
@@ -145,14 +146,16 @@ let handleGameResponse = (e) => {
                         },
                         fleetAfter: {
                             main: [],
-                            escort: []
+                            escort: [],
+                            LBAC: []
                         },
                         map: [maparear_id, mapinfo_no, curCellId],
                         packet: [
                             body
                         ],
                         type: bosscells.indexOf(curCellId) !== -1 ? 'Boss' : 'Normal',
-                        version: version
+                        version: version,
+                        groupId: 0
                     }
                 }
             } else {
@@ -171,14 +174,14 @@ let handleGameResponse = (e) => {
             setTimeout(() => {
                 if(battle_data.data && battle_data.data.packet) {
                     battle_data.data.fleet.main.map(item => {
-                        battle_data.data.fleetAfter.main.push(Object.clone(_ships[item.api_id]))
+                        battle_data.data.fleetAfter.main.push(_ships[item.api_id])
                     })
                     if(battle_data.data.fleet.escort) {
                         battle_data.data.fleet.escort.map(item => {
-                            battle_data.data.fleetAfter.escort.push(Object.clone(_ships[item.api_id]))
+                            battle_data.data.fleetAfter.escort.push(_ships[item.api_id])
                         })
                     }
-                    reportBattleDetail(battle_data)
+                    battle_data_list.push(Object.clone(battle_data))
                     battle_data = {}
                 }
             }, 500)
@@ -367,14 +370,14 @@ let handleGameResponse = (e) => {
             setTimeout(() => {
                 if(battle_data.data && battle_data.data.packet) {
                     battle_data.data.fleet.main.map(item => {
-                        battle_data.data.fleetAfter.main.push(Object.clone(_ships[item.api_id]))
+                        battle_data.data.fleetAfter.main.push(_ships[item.api_id])
                     })
                     if(battle_data.data.fleet.escort) {
                         battle_data.data.fleet.escort.map(item => {
-                            battle_data.data.fleetAfter.escort.push(Object.clone(_ships[item.api_id]))
+                            battle_data.data.fleetAfter.escort.push(_ships[item.api_id])
                         })
                     }
-                    reportBattleDetail(battle_data)
+                    battle_data_list.push(Object.clone(battle_data))
                     battle_data = {}
                 }
             }, 500)
@@ -538,6 +541,33 @@ let handleGameResponse = (e) => {
         //    break;
         case '/kcsapi/api_get_member/mapinfo':
             api_air_base = body.api_air_base
+            if(battle_data_list.length) {
+                let groupId = new Date().getTime() + String(parseInt(Math.random() * 1000))
+                if(hasLBAC) {
+                    let LBAC = []
+
+                    api_air_base.filter(i => {
+                        return i.api_area_id === battle_data_list[0].data.map[0] && i.api_action_kind === 1
+                    }).map(i => {
+                        i = Object.clone(i)
+                        i.api_plane_info = i.api_plane_info.map(item => {
+                            item.poi_slot = _slotitems[item.api_slotid] || null
+                            delete item.api_slotid
+                            return item
+                        })
+                        LBAC.push(i)
+                    })
+                    battle_data_list.map(item => {
+                        item.data.fleetAfter.LBAC = LBAC
+                    })
+                }
+                battle_data_list.map(item => {
+                    item.data.groupId = groupId
+                    reportBattleDetail(item)
+                })
+                battle_data_list = []
+            }
+
             for (const map of body.api_map_info) {
                 mapLevels[map.api_id] = 0;
                 mapinfo[map.api_id] = {

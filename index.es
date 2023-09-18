@@ -174,11 +174,11 @@ let handleGameResponse = (e) => {
             setTimeout(() => {
                 if(battle_data.data && battle_data.data.packet) {
                     battle_data.data.fleet.main.map(item => {
-                        battle_data.data.fleetAfter.main.push(_ships[item.api_id])
+                        battle_data.data.fleetAfter.main.push(item && _ships[item.api_id])
                     })
                     if(battle_data.data.fleet.escort) {
                         battle_data.data.fleet.escort.map(item => {
-                            battle_data.data.fleetAfter.escort.push(_ships[item.api_id])
+                            battle_data.data.fleetAfter.escort.push(item && _ships[item.api_id])
                         })
                     }
                     battle_data_list.push(Object.clone(battle_data))
@@ -370,11 +370,11 @@ let handleGameResponse = (e) => {
             setTimeout(() => {
                 if(battle_data.data && battle_data.data.packet) {
                     battle_data.data.fleet.main.map(item => {
-                        battle_data.data.fleetAfter.main.push(_ships[item.api_id])
+                        battle_data.data.fleetAfter.main.push(item && _ships[item.api_id])
                     })
                     if(battle_data.data.fleet.escort) {
                         battle_data.data.fleet.escort.map(item => {
-                            battle_data.data.fleetAfter.escort.push(_ships[item.api_id])
+                            battle_data.data.fleetAfter.escort.push(item && _ships[item.api_id])
                         })
                     }
                     battle_data_list.push(Object.clone(battle_data))

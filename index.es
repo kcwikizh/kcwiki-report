@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.3.14'
+let version = '3.3.15'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -13,6 +13,7 @@ let battle_data_list = [] // 战斗详情数据包列表，为了记录陆航更
 let api_air_base = []     // 陆航信息
 let hasLBAC = false       // 陆航是否出击
 let api_smoke_flag = null // 烟幕信息
+let remodel_data = {}     // 改修信息
 
 import {
     reportInit, reportEnemy,
@@ -21,7 +22,7 @@ import {
     reportInitEquipByDrop, reportInitEquipByBuild,
     reportInitEquipByRemodel, whenBattleResult,
     reoprtTyku, cacheSync, reportBattle, reportBattleV2,
-    reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest, reportBattleDetail
+    reportFrindly, reportAirBaseAttack, reportNextWayV2, reportQuest, reportBattleDetail, reportRemodel
 } from './report';
 import { getTykuV2, getSaku25, getSaku25a, getSaku33, appendSlotitemDetail } from './common';
 let handleBattleResult = (e) => {
@@ -701,6 +702,22 @@ let handleGameResponse = (e) => {
                 friendly_status.type = postBody.api_request_type
             }
             console.log('friendly_status2:', friendly_status)
+            break;
+        case '/kcsapi/api_req_kousyou/remodel_slotlist':
+            remodel_data = {
+                ship: _ships[_decks[0].api_ship[1]],
+                list: body,
+                timestamp: new Date().getTime(),
+                version: version
+            }
+            reportRemodel(remodel_data)
+            break;
+        case '/kcsapi/api_req_kousyou/remodel_slotlist_detail':
+            let api_id = Number(postBody.api_id)
+            let index = remodel_data.list.map(item => item.api_id).indexOf(api_id)
+            Object.assign(remodel_data.list[index], body)
+            remodel_data.list[index].api_level = _slotitems[Number(postBody.api_slot_id)].api_level // 改修等级
+            reportRemodel(remodel_data)
             break;
     }
 };

@@ -521,6 +521,16 @@ const reportBattleDetail = async (body) => {
     }
 }
 
+const reportRemodel = async (body) => {
+    if (cache.miss(body)) {
+        let response = await request.postAsync(`http://${HOST_V3}/api/report/remodel`, { body, json: true });
+
+        if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
+            console.log(`battle.action response: ${repData}`);
+        cache.put(body);
+    }
+}
+
 const cacheSync = () => {
     fs.ensureDirSync(join(APPDATA_PATH, 'kcwiki-report'));
     let data = JSON.stringify(cache.raw());
@@ -646,6 +656,7 @@ export {
     reportNextWayV2,
     reportQuest,
     reportBattleDetail,
+    reportRemodel,
     whenBattleResult,
     whenMapStart,
     whenRemodel,

@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.3.16'
+let version = '3.3.17'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -552,6 +552,20 @@ let handleGameResponse = (e) => {
         //    reportShipAttr(body.api_data);
         //    break;
         case '/kcsapi/api_get_member/mapinfo':
+            for (const map of body.api_map_info) {
+                mapLevels[map.api_id] = 0;
+                mapinfo[map.api_id] = {
+                    api_defeat_count: map.api_defeat_count,
+                    api_required_defeat_count: map.api_required_defeat_count
+                }
+                if (map.api_eventmap != null) {
+                    mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
+                    mapGauges[map.api_id] = map.api_eventmap.api_gauge_num;
+                    mapinfo[map.api_id].api_now_maphp = map.api_eventmap.api_now_maphp || 0
+                    mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp || 0
+                }
+            }
+
             api_air_base = body.api_air_base
             if(battle_data_list.length) {
                 let groupId = new Date().getTime() + String(parseInt(Math.random() * 1000))
@@ -573,25 +587,16 @@ let handleGameResponse = (e) => {
                         item.data.fleetAfter.LBAC = LBAC
                     })
                 }
+                let map = battle_data_list[0].data.map
+                let mapKey = String(map[0]) + map[1]
+
                 battle_data_list.map(item => {
                     item.data.groupId = groupId
+                    item.data.hp = mapinfo[mapKey]
+
                     reportBattleDetail(item)
                 })
                 battle_data_list = []
-            }
-
-            for (const map of body.api_map_info) {
-                mapLevels[map.api_id] = 0;
-                mapinfo[map.api_id] = {
-                    api_defeat_count: map.api_defeat_count,
-                    api_required_defeat_count: map.api_required_defeat_count
-                }
-                if (map.api_eventmap != null) {
-                    mapLevels[map.api_id] = map.api_eventmap.api_selected_rank;
-                    mapGauges[map.api_id] = map.api_eventmap.api_gauge_num;
-                    mapinfo[map.api_id].api_now_maphp = map.api_eventmap.api_now_maphp || 0
-                    mapinfo[map.api_id].api_max_maphp = map.api_eventmap.api_max_maphp || 0
-                }
             }
             break;
         case '/kcsapi/api_req_map/start_air_base':

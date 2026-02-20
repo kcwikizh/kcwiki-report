@@ -50,9 +50,14 @@ const reportGetLoseItem = async (body) => {
     if (typeof body.api_itemget !== "undefined" && body.api_itemget !== null) {
         // Item ID: 1 油 2 弹
         let eventId = [], count = [];
-        for (let item of body.api_itemget) {
-            eventId.push(+item.api_id);
-            count.push(+item.api_getcount);
+        if(body.api_itemget.api_id) {
+            eventId.push(+body.api_itemget.api_id);
+            count.push(+body.api_itemget.api_getcount);
+        } else {
+            for (let item of body.api_itemget) {
+                eventId.push(+item.api_id);
+                count.push(+item.api_getcount);
+            }
         }
         let info = {
             mapAreaId: +_mapAreaId,

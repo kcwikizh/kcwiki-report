@@ -25,9 +25,6 @@
     "description": "舰娘百科数据收集插件",
     "priority": 100
   },
-  "dependencies": {
-    "request": "^2.88.2"
-  },
   "devDependencies": {
     "babel-cli": "^6.16.0",
     "dotenv": "^2.0.0",

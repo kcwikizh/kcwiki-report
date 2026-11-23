@@ -8,7 +8,32 @@ if (_ === "undefined") {
 }
 let bluebird = require('bluebird');
 let fs = bluebird.promisifyAll(require('fs-extra'));
-let request = bluebird.promisifyAll(require('request'), { multiArgs: true });
+import fetch from 'node-fetch';
+
+function encodeForm(data) {
+    const params = new URLSearchParams();
+    function append(key, value) {
+        if (value === undefined) return;
+        if (value !== null && typeof value === 'object') {
+            for (const [child, item] of Object.entries(value))
+                append(key + '[' + child + ']', item);
+        } else {
+            params.append(key, value === null ? '' : String(value));
+        }
+    }
+    for (const [key, value] of Object.entries(data)) append(key, value);
+    return params;
+}
+
+async function postReport(url, body, json = false) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: json ? { 'Content-Type': 'application/json', Accept: 'application/json' } : {},
+        body: json ? JSON.stringify(body) : encodeForm(body),
+    });
+    if (response.status >= 300) console.log(response.status, response.statusText);
+    return response.text();
+}
 
 import { getTyku, getTykuV2, getSaku25, getSaku25a, getSaku33, sum, hashCode, HashTable } from './common';
 import { join } from 'path';
@@ -70,12 +95,7 @@ const reportGetLoseItem = async (body) => {
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(JSON.stringify(info));
         if (cache.miss(info)) {
-            let response = await request.postAsync(`http://${HOST}/mapEvent`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/mapEvent`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`getitem.action response: ${repData}`);
             cache.put(info);
@@ -96,12 +116,7 @@ const reportGetLoseItem = async (body) => {
         };
         if (process.env.DEBUG) console.log(JSON.stringify(info));
         if (cache.miss(info)) {
-            let response = await request.postAsync(`http://${HOST}/mapEvent`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/mapEvent`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`dropitem.action response: ${repData}`);
             cache.put(info);
@@ -124,12 +139,7 @@ const reportEnemy = async (body) => {
     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/enemy`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/enemy`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`enemy.action response: ${repData}`);
             cache.put(info);
@@ -175,12 +185,7 @@ const reportShipAttrByLevelUp = async (path) => {
                 console.log(JSON.stringify(info));
             if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                 try {
-                    let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
-                    if (window.POI_VERSION >= 'v8.0.0')
-                        response = response[0];
-                    let status = response.statusCode, repData = response.body;
-                    if (status >= 300)
-                        console.log(status, response.statusMessage);
+                    const repData = await postReport(`http://${HOST}/shipAttr`, info);
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log(`attr.action response: ${repData}`);
                     cache.put(info);
@@ -211,12 +216,7 @@ const reportShipAttr = async (ship) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/shipAttr`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`attr.action response: ${repData}`);
             cache.put(info);
@@ -254,14 +254,8 @@ const reportInitEquipByDrop = async (_ships) => {
                     console.log(JSON.stringify(info));
                 if (CACHE_SWITCH == 'off' || cache.miss(info)) {
                     try {
-                        let response = await request.postAsync(`http://${HOST}/shipAttr`, { form: info });
-                        if (window.POI_VERSION >= 'v8.0.0')
-                            response = response[0];
-                        let status = response.statusCode, repData = response.body;
-                        if (status >= 300)
-                            console.log(status, response.statusMessage);
+                        const repData = await postReport(`http://${HOST}/shipAttr`, info);
                         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null) {
-                            console.log(response)
                             console.log(`attr.action response: ${repData}`);
                         }
                         cache.put(info);
@@ -282,12 +276,7 @@ const reportInitEquipByDrop = async (_ships) => {
                 console.log(JSON.stringify(info));
             if (CACHE_SWITCH == 'off' || cache.miss(_newShips)) {
                 try {
-                    let response = await request.postAsync(`http://${HOST}/initEquip`, { form: info });
-                    if (window.POI_VERSION >= 'v8.0.0')
-                        response = response[0];
-                    let status = response.statusCode, repData = response.body;
-                    if (status >= 300)
-                        console.log(status, response.statusMessage);
+                    const repData = await postReport(`http://${HOST}/initEquip`, info);
                     if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                         console.log(`initEquip.action response: ${repData}`);
                     cache.put(_newShips);
@@ -313,12 +302,7 @@ const reportInitEquipByBuild = async (body, _ships) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/initEquip`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/initEquip`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`initEquip.action response: ${repData}`);
             cache.put(data);
@@ -339,12 +323,7 @@ const reportInitEquipByRemodel = async () => {
     }
     if (CACHE_SWITCH == 'off' || cache.miss(data)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/initEquip`, { form: { ships: data } });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/initEquip`, { ships: data });
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`initEquip.action response:  ${repData}`);
             cache.put(data);
@@ -380,12 +359,7 @@ const reoprtTyku = async (eSlot, eKouku, detail, seiku, dock_id, ship_id) => {
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/tyku`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/tyku`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`Tyku api response: ${repData}`);
             cache.put(info);
@@ -418,12 +392,7 @@ const reportBattle = async (mapinfo_no, maparea_id, cell_ids, _decks, dock_id, _
         console.log(JSON.stringify(info));
     if (CACHE_SWITCH == 'off' || cache.miss(info)) {
         try {
-            let response = await request.postAsync(`http://${HOST}/expedition`, { form: info });
-            if (window.POI_VERSION >= 'v8.0.0')
-                response = response[0];
-            let status = response.statusCode, repData = response.body;
-            if (status >= 300)
-                console.log(status, response.statusMessage);
+            const repData = await postReport(`http://${HOST}/expedition`, info);
             if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
                 console.log(`battle.action response:  ${repData}`);
             cache.put(info);
@@ -460,15 +429,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
         console.log(JSON.stringify(info));
 
     try {
-        let response = await request.postAsync(`http://${HOST_V2}/statistic/sortie`, {
-            body: JSON.stringify(info),
-            json: true,
-        });
-        if (window.POI_VERSION >= 'v8.0.0')
-            response = response[0];
-        let status = response.statusCode, repData = response.body;
-        if (status >= 300)
-            console.log(status, response.statusMessage);
+        const repData = await postReport(`http://${HOST_V2}/statistic/sortie`, info, true);
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response:  ${repData}`);
     } catch (err) {
@@ -478,7 +439,7 @@ const reportBattleV2 = async (mapinfo_no, maparea_id, mapLevels, mapGauges, cell
 
 const reportFrindly = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/friendly_info`, { body, json: true });
+        const repData = await postReport(`http://${HOST_V3}/api/report/friendly_info`, body, true);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`friendly.action response: ${repData}`);
@@ -488,7 +449,7 @@ const reportFrindly = async (body) => {
 
 const reportAirBaseAttack = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/air_base_attack`, { form: body });
+        const repData = await postReport(`http://${HOST_V3}/api/report/air_base_attack`, body);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`airbaseattack.action response: ${repData}`);
@@ -498,7 +459,7 @@ const reportAirBaseAttack = async (body) => {
 
 const reportNextWayV2 = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/next_way_v2`, { form: body });
+        const repData = await postReport(`http://${HOST_V3}/api/report/next_way_v2`, body);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`nextway.action response: ${repData}`);
@@ -508,7 +469,7 @@ const reportNextWayV2 = async (body) => {
 
 const reportQuest = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/quest`, { form: body });
+        const repData = await postReport(`http://${HOST_V3}/api/report/quest`, body);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`quest.action response: ${repData}`);
@@ -518,7 +479,7 @@ const reportQuest = async (body) => {
 
 const reportBattleDetail = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/battle`, { body, json: true });
+        const repData = await postReport(`http://${HOST_V3}/api/report/battle`, body, true);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response: ${repData}`);
@@ -528,7 +489,7 @@ const reportBattleDetail = async (body) => {
 
 const reportRemodel = async (body) => {
     if (cache.miss(body)) {
-        let response = await request.postAsync(`http://${HOST_V3}/api/report/remodel`, { body, json: true });
+        const repData = await postReport(`http://${HOST_V3}/api/report/remodel`, body, true);
 
         if (typeof process.env.DEBUG !== "undefined" && process.env.DEBUG !== null)
             console.log(`battle.action response: ${repData}`);

@@ -4,7 +4,7 @@ let combined_type = 0, preEscape = [], escapeList = [], api_cell_data = 0;
 let quest_clear_id = -1, questlist = [], questDate = 0; // 任务日期与任务列表同步更新
 let friendly_status = { flag: 0, type: 0 }; // 友军状态，是否邀请，是否强力
 let friendly_data = {}    // 友军数据暂存 为了保存出击前后的喷火数，延迟发送
-let version = '3.3.19'
+let version = '3.3.20'
 let formation = ''        // 阵型选择
 let api_xal01 = ''        // 是否削甲
 let firenumBefore = 0     // 进入海图时的喷火数量
@@ -264,6 +264,7 @@ let handleGameResponse = (e) => {
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) {
+                        _item = Object.clone(_item)
                         if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
                             _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
                             _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
@@ -278,6 +279,7 @@ let handleGameResponse = (e) => {
                 let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) {
+                        _item = Object.clone(_item)
                         if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
                             _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
                             _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
@@ -423,6 +425,7 @@ let handleGameResponse = (e) => {
                 let deck1 = _decks[deck1_index].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) {
+                        _item = Object.clone(_item)
                         if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
                             _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
                             _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
@@ -437,6 +440,7 @@ let handleGameResponse = (e) => {
                 let deck2 = hasTwo ? _decks[1].api_ship.map(item => {
                     let _item = _ships[item];
                     if (_item) {
+                        _item = Object.clone(_item)
                         if(_item.api_slot_ex && _item.api_slot_ex !== -1) {
                             _item.api_slotitem_ex = _slotitems[_item.api_slot_ex].api_slotitem_id
                             _item.api_slotitem_level = _slotitems[_item.api_slot_ex].api_level
